@@ -8,6 +8,26 @@ const tokenService = require('~/services/token')
 const Token = require('~/models/token')
 const { expectError } = require('~/test/helpers')
 
+
+jest.mock('~/services/email', () => ({
+  sendEmail: jest.fn().mockResolvedValue(true)
+}))
+
+jest.mock('google-auth-library', () => {
+  return {
+    OAuth2Client: jest.fn().mockImplementation(() => ({
+      verifyIdToken: jest.fn().mockResolvedValue({
+        getPayload: () => ({
+          email: 'google-test@gmail.com',
+          given_name: 'Google',
+          family_name: 'User'
+        })
+      })
+    }))
+  }
+})
+
+
 describe('Auth controller', () => {
   let app, server, signupResponse
 
@@ -114,4 +134,32 @@ describe('Auth controller', () => {
       expectError(400, errors.BAD_RESET_TOKEN, response)
     })
   })
+
+//--
+  describe('Google Login endpoint', () => {
+    const googlePayload = {
+      token: { credential: 'fake-google-token' },
+      role: 'student'
+    }
+
+    it('should login or signup user via Google', async () => {
+      const response = await app
+        .post('/auth/google-auth') 
+        .send(googlePayload)
+
+      expect(response.status).toBe(200)
+      expect(response.body).toHaveProperty('accessToken')
+      
+      // is refresh token cookie set
+      const cookie = response.headers['set-cookie'][0]
+      expect(cookie).toContain('refreshToken')
+    })
+
+    it('should return error if token is missing', async () => {
+      const response = await app.post('/auth/google-auth').send({ role: 'student' })
+      expect(response.status).toBe(500) 
+    })
+  })
+  
+
 })
