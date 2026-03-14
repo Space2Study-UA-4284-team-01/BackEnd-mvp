@@ -10,13 +10,8 @@ const options = {
     info: {
       title: 'SpaceToStudy API',
       version: '1.0.0',
-      description: 'API documentation for Space2Study'
-    },
-    servers: [
-      {
-        url: `http://localhost:${SERVER_PORT}`
-      }
-    ]
+      description: 'API documentation for SpaceToStudy'
+    }
   },
   apis: ['./src/routes/*.js']
 }
