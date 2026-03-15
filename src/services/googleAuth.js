@@ -1,6 +1,7 @@
 const { OAuth2Client } = require('google-auth-library')
 const authService = require('~/services/auth')
-const { getUserByEmail, createUser, privateUpdateUser } = require('~/services/user')
+//const { getUserByEmail, createUser, privateUpdateUser } = require('~/services/user')
+const { getUserByEmail, createUser } = require('~/services/user')
 const crypto = require('crypto')
 const { gmailCredentials } = require('~/configs/config')
 const client = new OAuth2Client(gmailCredentials.clientId)
@@ -27,8 +28,8 @@ const googleAuthService = {
     // if user doesn't exist, create it with random password and mark email as confirmed (because Google already confirmed it)
     if (!user) {
       const randomPassword = crypto.randomBytes(16).toString('hex')
-      user = await createUser(role, given_name, family_name, email, randomPassword, language)
-      await privateUpdateUser(user._id, { isEmailConfirmed: true })
+      user = await createUser(role, given_name, family_name, email, randomPassword, language, true)
+      //await privateUpdateUser(user._id, { isEmailConfirmed: true })
     }
 
     // return isFromGoogle = true
