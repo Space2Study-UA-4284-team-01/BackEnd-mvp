@@ -13,20 +13,6 @@ jest.mock('~/services/email', () => ({
   sendEmail: jest.fn().mockResolvedValue(true)
 }))
 
-jest.mock('google-auth-library', () => {
-  return {
-    OAuth2Client: jest.fn().mockImplementation(() => ({
-      verifyIdToken: jest.fn().mockResolvedValue({
-        getPayload: () => ({
-          email: 'google-test@gmail.com',
-          given_name: 'Google',
-          family_name: 'User'
-        })
-      })
-    }))
-  }
-})
-
 
 describe('Auth controller', () => {
   let app, server, signupResponse
@@ -137,6 +123,22 @@ describe('Auth controller', () => {
 
 //--
   describe('Google Login endpoint', () => {
+
+    beforeEach(() => {
+      const { OAuth2Client } = require('google-auth-library')
+      OAuth2Client.prototype.verifyIdToken = jest.fn().mockResolvedValue({
+        getPayload: () => ({
+          email: 'google-test@gmail.com',
+          given_name: 'Google',
+          family_name: 'User'
+        })
+      })
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks() 
+    })
+
     const googlePayload = {
       token: { credential: 'fake-google-token' },
       role: 'student'
@@ -151,13 +153,18 @@ describe('Auth controller', () => {
       expect(response.body).toHaveProperty('accessToken')
       
       // is refresh token cookie set
-      const cookie = response.headers['set-cookie'][0]
-      expect(cookie).toContain('refreshToken')
+      const setCookieHeader = response.headers['set-cookie'] || []
+      const refreshTokenCookie = Array.isArray(setCookieHeader)
+        ? setCookieHeader.find((cookie) => cookie.includes('refreshToken=')) 
+        : setCookieHeader.includes('refreshToken=') ? setCookieHeader : undefined 
+
+      expect(refreshTokenCookie).toBeDefined()
+      expect(refreshTokenCookie).toContain('refreshToken=')
     })
 
     it('should return error if token is missing', async () => {
       const response = await app.post('/auth/google-auth').send({ role: 'student' })
-      expect(response.status).toBe(500) 
+      expect(response.status).toBe(400) 
     })
   })
   
