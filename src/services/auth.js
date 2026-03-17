@@ -6,6 +6,7 @@ const {
   EMAIL_NOT_CONFIRMED,
   INCORRECT_CREDENTIALS,
   BAD_RESET_TOKEN,
+  BAD_CONFIRM_TOKEN, 
   BAD_REFRESH_TOKEN,
   USER_NOT_FOUND
 } = require('~/consts/errors')
@@ -25,6 +26,18 @@ const authService = {
       userId: user._id,
       userEmail: user.email
     }
+  },
+
+  confirmEmail: async (confirmToken) => {
+    const tokenData = tokenService.validateConfirmToken(confirmToken)
+    const tokenFromDB = await tokenService.findToken(confirmToken, CONFIRM_TOKEN)
+
+    if (!tokenData || !tokenFromDB) {
+      throw createError(400, BAD_CONFIRM_TOKEN)
+    }
+
+    await privateUpdateUser(tokenData.id, { isEmailConfirmed: true })
+    await tokenService.removeConfirmToken(confirmToken)
   },
 
   login: async (email, password, isFromGoogle) => {
