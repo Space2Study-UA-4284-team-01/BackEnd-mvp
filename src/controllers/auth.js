@@ -88,14 +88,13 @@ const updatePassword = async (req, res) => {
 
 
 const confirmEmail = async (req, res) => {
-  const { confirmToken } = req.params;
+  const { confirmToken } = req.params
 
-  await authService.confirmEmail(confirmToken);
+  await authService.confirmEmail(confirmToken)
 
   res.status(204).end()
   
 }
-
 
 
 module.exports = {
