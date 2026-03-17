@@ -7,6 +7,7 @@ jest.mock('~/services/email')
 const authService = require('~/services/auth')
 const tokenService = require('~/services/token')
 const userService = require('~/services/user')
+const { tokenNames } = require('~/consts/auth')
 const errors = require('~/consts/errors')
 
 describe('Auth service', () => {
@@ -24,7 +25,7 @@ describe('Auth service', () => {
       })
 
       expect(tokenService.validateConfirmToken).toHaveBeenCalledWith('invalid-token')
-      expect(tokenService.findToken).toHaveBeenCalledWith('invalid-token', expect.any(String))
+      expect(tokenService.findToken).toHaveBeenCalledWith('invalid-token', tokenNames.CONFIRM_TOKEN)
     })
 
     it('should set isEmailConfirmed and remove confirm token when token is valid', async () => {

@@ -36,7 +36,7 @@ router.get(
   '/confirm-email/:confirmToken', 
   langMiddleware, 
   asyncWrapper(authController.confirmEmail)
-);
+)
 
 
 module.exports = router
