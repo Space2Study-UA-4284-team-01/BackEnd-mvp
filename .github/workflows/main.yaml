@@ -13,8 +13,6 @@ jobs:
       - name: 'Checkout the Repo'
         uses: actions/checkout@v3
 
-      # - name: Run DB
-
       - name: 'Start MongoDB'
         uses: supercharge/mongodb-github-action@1.8.0
         with:
@@ -64,3 +62,19 @@ jobs:
           GMAIL_REFRESH_TOKEN: ${{secrets.GMAIL_REFRESH_TOKEN}}
           GMAIL_REDIRECT_URI: ${{secrets.GMAIL_REDIRECT_URI}}
           COOKIE_DOMAIN: ${{secrets.COOKIE_DOMAIN}}
+
+  SonarCloud:
+    name: SonarCloud Scan
+    needs: Test_DEV
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout the Repo'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 'SonarCloud Scan'
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
