@@ -14,8 +14,12 @@ const tokenNames = {
 
 const oneDayInMs = 86400000
 
+const SALT_ROUNDS = 10
+
 module.exports = {
   roles,
   oneDayInMs,
-  tokenNames
+  tokenNames,
+  SALT_ROUNDS
 }
+
