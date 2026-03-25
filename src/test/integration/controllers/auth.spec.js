@@ -7,6 +7,7 @@ const errors = require('~/consts/errors')
 const tokenService = require('~/services/token')
 const Token = require('~/models/token')
 const { expectError } = require('~/test/helpers')
+const bcrypt = require('bcrypt')
 
 
 jest.mock('~/services/email', () => ({
@@ -165,6 +166,36 @@ describe('Auth controller', () => {
     it('should return error if token is missing', async () => {
       const response = await app.post('/auth/google-auth').send({ role: 'student' })
       expect(response.status).toBe(400) 
+    })
+  })
+
+  //-- 
+  describe('Login endpoint', () => {
+    beforeEach(async () => {
+      const User = require('~/models/user')
+      await User.findOneAndUpdate(
+        { email: user.email }, 
+        { isEmailConfirmed: true }
+      )
+    })
+
+    it('should login successfully with correct credentials', async () => {
+      const loginResponse = await app.post('/auth/login').send({
+        email: user.email,
+        password: user.password
+      })
+
+      expect(loginResponse.status).toBe(200)
+      expect(loginResponse.body).toHaveProperty('accessToken')
+    })
+
+    it('should throw INCORRECT_CREDENTIALS for wrong password', async () => {
+      const response = await app.post('/auth/login').send({
+        email: user.email,
+        password: 'wrong_password'
+      })
+
+      expectError(401, errors.INCORRECT_CREDENTIALS, response)
     })
   })
   

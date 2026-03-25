@@ -13,6 +13,9 @@ const {
   VALUE_MUST_BE_BELOW
 } = require('~/consts/errors')
 
+const { SALT_ROUNDS } = require('~/consts/auth')
+const bcrypt = require('bcrypt')
+
 const userSchema = new Schema(
   {
     role: {
@@ -215,5 +218,14 @@ const userSchema = new Schema(
     id: false
   }
 )
+
+
+userSchema.pre('save', async function (next) {
+  // hash password only if it was modified or is new
+  if (!this.isModified('password')) return next()
+
+  this.password = await bcrypt.hash(this.password, SALT_ROUNDS)
+  next()
+})
 
 module.exports = model(USER, userSchema)
