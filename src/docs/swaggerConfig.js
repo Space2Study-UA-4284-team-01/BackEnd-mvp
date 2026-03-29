@@ -13,7 +13,7 @@ const options = {
       description: 'API documentation for SpaceToStudy'
     }
   },
-  apis: ['./src/routes/*.js']
+  apis: ['./src/routes/*.js', './src/docs/**/*.swagger.js']
 }
 
 const swaggerSpec = swaggerJsdoc(options)

@@ -6,6 +6,7 @@ const email = require('~/routes/email')
 const adminInvitation = require('~/routes/adminInvitation')
 const question = require('~/routes/question')
 const resourcesCategory = require('~/routes/resourcesCategory')
+const category = require('~/routes/category')
 const offer = require('~/routes/offer')
 const googleAuth = require('~/routes/googleAuth')
 
@@ -17,6 +18,7 @@ router.use('/send-email', email)
 router.use('/admin-invitations', adminInvitation)
 router.use('/questions', question)
 router.use('/resources-categories', resourcesCategory)
+router.use('/categories', category)
 router.use('/offers', offer)
 
 module.exports = router

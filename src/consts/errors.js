@@ -120,6 +120,10 @@ const errors = {
     code: 'DOCUMENT_ALREADY_EXISTS',
     message: `'${uniqueFields}' field(s) must be unique.`
   }),
+  FIELD_ALREADY_EXISTS: (uniqueFields) => ({
+    code: 'FIELD_ALREADY_EXISTS',
+    message: `'${uniqueFields}' field(s) must be unique.`
+  }),
   MONGO_SERVER_ERROR: (message) => ({
     code: 'MONGO_SERVER_ERROR',
     message: message
