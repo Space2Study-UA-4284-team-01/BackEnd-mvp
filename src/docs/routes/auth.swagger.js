@@ -65,17 +65,8 @@
  *         description: The confirmation token sent to the user's email
  *         example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *     responses:
- *       200:
- *         description: Email confirmed successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Confirmation message
- *                   example: "Email confirmed successfully"
+ *       204:
+ *         description: Email confirmed successfully, no content returned
  *       400:
  *         description: Invalid or expired token
  *       500:
