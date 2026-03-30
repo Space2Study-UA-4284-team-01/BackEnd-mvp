@@ -2,7 +2,7 @@ const locationService = require('~/services/location')
 
 describe('Location Service Unit Tests', () => {
   beforeEach(() => {
-    global.fetch = jest.fn()
+    globalThis.fetch = jest.fn()
   })
 
   afterEach(() => {
@@ -16,7 +16,7 @@ describe('Location Service Unit Tests', () => {
         { name: 'Poland', iso2: 'PL', phone_code: '48', id: 2 }
       ]
 
-      global.fetch.mockResolvedValueOnce({
+      globalThis.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockApiCountries
       })
@@ -40,19 +40,19 @@ describe('Location Service Unit Tests', () => {
         { name: 'Kyiv Oblast', iso2: '30' },
         { name: 'Lviv Oblast', iso2: '46' }
       ]
-      global.fetch.mockResolvedValueOnce({
+      globalThis.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockStates
       })
 
       // 2. mock the responses for cities of each state
       // cities for Kyiv Oblast
-      global.fetch.mockResolvedValueOnce({
+      globalThis.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => [{ name: 'Kyiv' }, { name: 'Boryspil' }]
       })
       // cities for Lviv Oblast
-      global.fetch.mockResolvedValueOnce({
+      globalThis.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => [{ name: 'Lviv' }]
       })
@@ -69,11 +69,11 @@ describe('Location Service Unit Tests', () => {
       ])
 
       // check that 3 fetch calls were made: 1 for states + 2 for cities
-      expect(global.fetch).toHaveBeenCalledTimes(3)
+      expect(globalThis.fetch).toHaveBeenCalledTimes(3)
     })
 
     it('should return an empty array if the country has no states', async () => {
-      global.fetch.mockResolvedValueOnce({
+      globalThis.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => []
       })
@@ -81,23 +81,23 @@ describe('Location Service Unit Tests', () => {
       const result = await locationService.getCitiesByCountry('SOME_ISO')
 
       expect(result).toEqual([])
-      expect(global.fetch).toHaveBeenCalledTimes(1)
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1)
     })
 
     it('should not fail if one of the state-to-cities requests fails (403/404)', async () => {
       // mock the response for states of the country
-      global.fetch.mockResolvedValueOnce({
+      globalThis.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => [{ iso2: 'ST1' }, { iso2: 'ST2' }]
       })
 
       // first cities request is successful, second one fails with 403 or 404
-      global.fetch.mockResolvedValueOnce({
+      globalThis.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => [{ name: 'City 1' }]
       })
       // second request fails
-      global.fetch.mockResolvedValueOnce({
+      globalThis.fetch.mockResolvedValueOnce({
         ok: false,
         statusText: 'Forbidden'
       })

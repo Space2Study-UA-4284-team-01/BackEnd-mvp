@@ -59,11 +59,16 @@ const locationService = {
           }
         )
 
-        if (!res.ok) return []
+        if (!res.ok) {
+          console.error(`Failed to fetch cities for state ${state.iso2}: ${res.statusText}`)
+          return []
+        }
 
         const cities = await res.json()
+        // we only need the name field for each city
         return cities.map(({ name }) => ({ name }))
       } catch (error) {
+        console.error(`Unexpected error fetching cities for state ${state.iso2}:`, error.message)
         return []
       }
     })
