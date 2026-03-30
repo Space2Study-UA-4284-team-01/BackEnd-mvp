@@ -52,6 +52,10 @@ const errors = {
     code: 'FORBIDDEN',
     message: 'You do not have permission to perform this action.'
   },
+  EXTERNAL_SERVICE_ERROR: {
+    code: 'EXTERNAL_SERVICE_ERROR',
+    message: 'An error occurred while communicating with an external service.'
+  },
   BAD_REQUEST: {
     code: 'BAD_REQUEST',
     message: 'The request could not be processed due to invalid or missing parameters.'
