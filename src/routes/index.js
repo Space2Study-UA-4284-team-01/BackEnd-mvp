@@ -8,10 +8,12 @@ const question = require('~/routes/question')
 const resourcesCategory = require('~/routes/resourcesCategory')
 const offer = require('~/routes/offer')
 const googleAuth = require('~/routes/googleAuth')
+const location = require('~/routes/location')
 
 
 router.use('/auth', auth)
 router.use('/auth/google-auth', googleAuth) 
+router.use('/location', location)
 router.use('/users', user)
 router.use('/send-email', email)
 router.use('/admin-invitations', adminInvitation)
