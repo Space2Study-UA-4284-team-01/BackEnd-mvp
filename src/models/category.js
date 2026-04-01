@@ -12,20 +12,20 @@ const categorySchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, FIELD_CANNOT_BE_EMPTY('name')],
+      required: [true, FIELD_CANNOT_BE_EMPTY('name').message],
       unique: true,
-      minlength: [MIN_NAME_LENGTH, FIELD_IS_NOT_OF_PROPER_LENGTH('name', { min: MIN_NAME_LENGTH, max: MAX_NAME_LENGTH })],
-      maxlength: [MAX_NAME_LENGTH, FIELD_IS_NOT_OF_PROPER_LENGTH('name', { min: MIN_NAME_LENGTH, max: MAX_NAME_LENGTH })]
+      minlength: [MIN_NAME_LENGTH, FIELD_IS_NOT_OF_PROPER_LENGTH('name', { min: MIN_NAME_LENGTH, max: MAX_NAME_LENGTH }).message],
+      maxlength: [MAX_NAME_LENGTH, FIELD_IS_NOT_OF_PROPER_LENGTH('name', { min: MIN_NAME_LENGTH, max: MAX_NAME_LENGTH }).message]
     },
     appearance: {
       icon: {
         type: String,
-        required: [true, FIELD_CANNOT_BE_EMPTY('icon')],
+        required: [true, FIELD_CANNOT_BE_EMPTY('icon').message],
         default: 'mocked-path-to-icon'
       },
       color: {
         type: String,
-        required: [true, FIELD_CANNOT_BE_EMPTY('color')],
+        required: [true, FIELD_CANNOT_BE_EMPTY('color').message],
         default: '#66C42C'
       }
     },
