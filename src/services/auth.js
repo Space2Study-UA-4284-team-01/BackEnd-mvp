@@ -5,6 +5,7 @@ const { createError } = require('~/utils/errorsHelper')
 const {
   EMAIL_NOT_CONFIRMED,
   INCORRECT_CREDENTIALS,
+  INTERNAL_SERVER_ERROR,
   BAD_RESET_TOKEN,
   BAD_CONFIRM_TOKEN, 
   BAD_REFRESH_TOKEN,
@@ -50,7 +51,33 @@ const authService = {
     }
 
     // compare through bcrypt if not from Google
-    const checkedPassword = isFromGoogle || await bcrypt.compare(password, user.password)
+    //const checkedPassword = isFromGoogle || await bcrypt.compare(password, user.password)
+
+    let checkedPassword = isFromGoogle
+
+    if (!isFromGoogle) {
+      // check if the password in DB is hashed (starts with $2)
+      const isHashed = user.password.startsWith('$2')
+
+      if (isHashed) {
+        try {
+          checkedPassword = await bcrypt.compare(password, user.password)
+        } catch (error) {
+          console.error('Bcrypt unexpected error:', error.message)
+          throw createError(500, INTERNAL_SERVER_ERROR)
+        }
+      } else {
+        // if password is not hashed, compare directly and then hash it for future logins
+        checkedPassword = (password === user.password)
+
+        if (checkedPassword) {
+          // hashing
+          const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
+          await privateUpdateUser(user._id, { password: hashedPassword })
+        }
+      }
+    }
+    
 
     if (!checkedPassword) {
       throw createError(401, INCORRECT_CREDENTIALS)
