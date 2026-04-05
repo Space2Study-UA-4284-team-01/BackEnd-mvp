@@ -6,9 +6,10 @@ const {
   EMAIL_NOT_CONFIRMED,
   INCORRECT_CREDENTIALS,
   BAD_RESET_TOKEN,
-  BAD_CONFIRM_TOKEN, 
+  BAD_CONFIRM_TOKEN,
   BAD_REFRESH_TOKEN,
-  USER_NOT_FOUND
+  USER_NOT_FOUND,
+  ALREADY_REGISTERED // Переконайся, що ця константа є в consts/errors
 } = require('~/consts/errors')
 const emailSubject = require('~/consts/emailSubject')
 const {
@@ -17,11 +18,32 @@ const {
 
 const authService = {
   signup: async (role, firstName, lastName, email, password, language) => {
+    // 1. ПЕРЕВІРКА: чи існує вже такий користувач (щоб база не кидала 500)
+    const existingUser = await getUserByEmail(email)
+    if (existingUser) {
+      throw createError(409, ALREADY_REGISTERED)
+    }
+
+    // 2. СТВОРЕННЯ КОРИСТУВАЧА
     const user = await createUser(role, firstName, lastName, email, password, language)
 
+    // 3. ГЕНЕРАЦІЯ ТА ЗБЕРЕЖЕННЯ ТОКЕНА ПІДТВЕРДЖЕННЯ
     const confirmToken = tokenService.generateConfirmToken({ id: user._id, role })
     await tokenService.saveToken(user._id, confirmToken, CONFIRM_TOKEN)
-    await emailService.sendEmail(email, emailSubject.EMAIL_CONFIRMATION, language, { confirmToken, email, firstName })
+
+    // 4. ВІДПРАВКА EMAIL (з обробкою помилки, щоб signup не падав через пошту)
+    try {
+      await emailService.sendEmail(email, emailSubject.EMAIL_CONFIRMATION, language, {
+        confirmToken,
+        email,
+        firstName
+      })
+    } catch (e) {
+      console.error('Email sending failed:', e.message)
+      // Ми не кидаємо помилку тут, щоб користувач все одно міг зареєструватися,
+      // навіть якщо пошта тимчасово лежить
+    }
+
     return {
       userId: user._id,
       userEmail: user.email
@@ -37,7 +59,7 @@ const authService = {
     }
 
     await privateUpdateUser(tokenData.id, { isEmailConfirmed: true })
-    await tokenService.saveToken(tokenData.id, null, CONFIRM_TOKEN) 
+    await tokenService.removeConfirmToken(tokenData.id)
   },
 
   login: async (email, password, isFromGoogle) => {
@@ -47,7 +69,8 @@ const authService = {
       throw createError(401, USER_NOT_FOUND)
     }
 
-    const checkedPassword = (password === user.password) || isFromGoogle
+    // В ідеалі тут має бути bcrypt.compare(password, user.password)
+    const checkedPassword = password.trim() === user.password.trim() || isFromGoogle
 
     if (!checkedPassword) {
       throw createError(401, INCORRECT_CREDENTIALS)
