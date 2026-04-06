@@ -75,7 +75,7 @@ const errors = {
     code: 'BAD_RESET_TOKEN',
     message: 'The reset token is either invalid or has expired.'
   },
-  BAD_CONFIRM_TOKEN: { 
+  BAD_CONFIRM_TOKEN: {
     code: 'BAD_CONFIRM_TOKEN',
     message: 'The confirmation token is either invalid or has expired.'
   },
@@ -98,6 +98,10 @@ const errors = {
   INVALID_LANGUAGE: {
     code: 'INVALID_LANGUAGE',
     message: `The language name is invalid. Possible options: ${APP_LANG_ENUM.join(', ')}.`
+  },
+  SUBJECT_ALREADY_EXISTS: {
+    code: 'SUBJECT_ALREADY_EXISTS',
+    message: 'Subject with the specified name already exists.'
   },
   DOCUMENT_NOT_FOUND: (document) => ({
     code: 'DOCUMENT_NOT_FOUND',
