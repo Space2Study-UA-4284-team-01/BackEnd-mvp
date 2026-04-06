@@ -35,7 +35,7 @@ describe('Auth service', () => {
       await authService.confirmEmail('valid-token')
 
       expect(userService.privateUpdateUser).toHaveBeenCalledWith('userId', { isEmailConfirmed: true })
-      expect(tokenService.removeConfirmToken).toHaveBeenCalledWith('valid-token')
+      expect(tokenService.saveToken).toHaveBeenCalledWith('userId', null, tokenNames.CONFIRM_TOKEN)
     })
   })
 })

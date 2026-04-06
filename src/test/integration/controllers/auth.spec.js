@@ -197,6 +197,44 @@ describe('Auth controller', () => {
 
       expectError(401, errors.INCORRECT_CREDENTIALS, response)
     })
+
+    it('should migrate plain text password to hashed on successful login', async () => {
+      const User = require('~/models/user')
+      
+      // create a user with plain text password directly in the DB, bypassing the model hooks
+      const plainPassword = 'plaintextpass123'
+      const testUser = {
+        role: ['student'],
+        firstName: 'Migration',
+        lastName: 'Test',
+        email: 'migration@test.com',
+        password: plainPassword, // unhashed
+        lastLoginAs: 'student',
+        appLanguage: 'en',
+        isEmailConfirmed: true,
+        isFirstLogin: true
+      }
+      
+      // insert the user directly, bypassing the model (to avoid the hook)
+      await User.collection.insertOne(testUser)
+      
+      // try to login
+      const loginResponse = await app.post('/auth/login').send({
+        email: testUser.email,
+        password: plainPassword
+      })
+      
+      expect(loginResponse.status).toBe(200)
+      expect(loginResponse.body).toHaveProperty('accessToken')
+      
+      // verify that the password is now hashed in the DB
+      const updatedUser = await User.findOne({ email: testUser.email }).select('+password')
+      expect(updatedUser.password).toMatch(/^\$2/) // starts with $2 (bcrypt hash)
+      
+      // verify that the hash matches the password
+      const isValidHash = await bcrypt.compare(plainPassword, updatedUser.password)
+      expect(isValidHash).toBe(true)
+    })
   })
   
 
