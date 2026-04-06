@@ -10,17 +10,18 @@ const subjectService = {
 
       validateFunc.required('name', true, name)
       validateFunc.type('name', 'string', name)
-      validateFunc.length('name', { min: 2, max: 50 }, name)
+      const normalizedName = name.trim()
+      validateFunc.length('name', { min: 2, max: 50 }, normalizedName)
 
       if (description !== undefined) {
         validateFunc.type('description', 'string', description)
       }
 
-      const existingSubject = await Subject.findOne({ name })
+      const existingSubject = await Subject.findOne({ name: normalizedName })
       if (existingSubject) {
         throw createError(409, errors.SUBJECT_ALREADY_EXISTS)
       }
-      return await Subject.create(data)
+      return await Subject.create({ ...data, name: normalizedName })
     } catch (err) {
       if (err.status) throw err
 
@@ -28,7 +29,7 @@ const subjectService = {
         throw createError(409, errors.SUBJECT_ALREADY_EXISTS)
       }
 
-      throw createError(500, errors.MONGO_SERVER_ERROR(err.message))
+      throw createError(500, errors.MONGO_SERVER_ERROR('Failed to create subject'))
     }
   }
 }

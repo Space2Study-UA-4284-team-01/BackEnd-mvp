@@ -14,7 +14,7 @@ describe('Subject Service', () => {
     jest.clearAllMocks()
   })
 
-  test("should create a subject when it doesn't exist", async () => {
+  test('should create a subject when it does not exist', async () => {
     const subject = { ...validSubjectData, id: '1' }
     Subject.findOne.mockResolvedValue(null)
     Subject.create.mockResolvedValue(subject)
