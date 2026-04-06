@@ -56,8 +56,9 @@ const authService = {
     let checkedPassword = isFromGoogle
 
     if (!isFromGoogle) {
-      // check if the password in DB is hashed (starts with $2)
-      const isHashed = user.password.startsWith('$2')
+      // check if the password in DB is hashed (bcrypt format)
+      const bcryptHashRegex = /^\$2[aby]\$\d{1,2}\$[./A-Za-z0-9]{53}$/
+      const isHashed = bcryptHashRegex.test(user.password)
 
       if (isHashed) {
         try {
