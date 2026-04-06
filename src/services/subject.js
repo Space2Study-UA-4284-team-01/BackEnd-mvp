@@ -2,6 +2,7 @@ const Subject = require('~/models/subject')
 const errors = require('~/consts/errors')
 const { createError } = require('~/utils/errorsHelper')
 const { validateFunc } = require('~/utils/validationHelper')
+const mongosanitize = require('mongo-sanitize')
 
 const subjectService = {
   createSubject: async (data) => {
@@ -10,7 +11,8 @@ const subjectService = {
 
       validateFunc.required('name', true, name)
       validateFunc.type('name', 'string', name)
-      const normalizedName = name.trim()
+      const sanitizedName = mongosanitize(name)
+      const normalizedName = String(sanitizedName).trim().toLowerCase()
       validateFunc.length('name', { min: 2, max: 50 }, normalizedName)
 
       if (description !== undefined) {

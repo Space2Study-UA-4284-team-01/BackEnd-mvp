@@ -8,9 +8,7 @@ const {
   FIELD_ALREADY_EXISTS
 } = require('~/consts/errors')
 const testUserAuthentication = require('~/utils/testUserAuth')
-const {
-  roles: { ADMIN, STUDENT, TUTOR }
-} = require('~/consts/auth')
+const { adminUserData, studentUserData, tutorUserData } = require('~/test/helpers/userData')
 
 const endpointUrl = '/categories/'
 
@@ -20,42 +18,6 @@ const testCategoryData = {
     icon: 'math-icon.png',
     color: '#FF0000'
   }
-}
-
-const adminUserData = {
-  role: ADMIN,
-  firstName: 'Admin',
-  lastName: 'User',
-  email: 'admin@example.com',
-  password: 'adminpass',
-  appLanguage: 'en',
-  isEmailConfirmed: true,
-  lastLogin: new Date().toJSON(),
-  lastLoginAs: ADMIN
-}
-
-const studentUserData = {
-  role: STUDENT,
-  firstName: 'Student',
-  lastName: 'User',
-  email: 'student@example.com',
-  password: 'studentpass',
-  appLanguage: 'en',
-  isEmailConfirmed: true,
-  lastLogin: new Date().toJSON(),
-  lastLoginAs: STUDENT
-}
-
-const tutorUserData = {
-  role: TUTOR,
-  firstName: 'Tutor',
-  lastName: 'User',
-  email: 'tutor@example.com',
-  password: 'tutorpass',
-  appLanguage: 'en',
-  isEmailConfirmed: true,
-  lastLogin: new Date().toJSON(),
-  lastLoginAs: TUTOR
 }
 
 describe('Category controller', () => {
