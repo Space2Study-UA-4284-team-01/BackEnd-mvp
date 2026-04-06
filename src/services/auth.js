@@ -5,8 +5,9 @@ const { createError } = require('~/utils/errorsHelper')
 const {
   EMAIL_NOT_CONFIRMED,
   INCORRECT_CREDENTIALS,
+  INTERNAL_SERVER_ERROR,
   BAD_RESET_TOKEN,
-  BAD_CONFIRM_TOKEN, 
+  BAD_CONFIRM_TOKEN,
   BAD_REFRESH_TOKEN,
   USER_NOT_FOUND
 } = require('~/consts/errors')
@@ -14,6 +15,8 @@ const emailSubject = require('~/consts/emailSubject')
 const {
   tokenNames: { REFRESH_TOKEN, RESET_TOKEN, CONFIRM_TOKEN }
 } = require('~/consts/auth')
+const bcrypt = require('bcrypt')
+const { SALT_ROUNDS } = require('~/consts/auth')
 
 const authService = {
   signup: async (role, firstName, lastName, email, password, language) => {
@@ -37,7 +40,7 @@ const authService = {
     }
 
     await privateUpdateUser(tokenData.id, { isEmailConfirmed: true })
-    await tokenService.saveToken(tokenData.id, null, CONFIRM_TOKEN) 
+    await tokenService.saveToken(tokenData.id, null, CONFIRM_TOKEN)
   },
 
   login: async (email, password, isFromGoogle) => {
@@ -47,7 +50,34 @@ const authService = {
       throw createError(401, USER_NOT_FOUND)
     }
 
-    const checkedPassword = (password === user.password) || isFromGoogle
+    // compare through bcrypt if not from Google
+    //const checkedPassword = isFromGoogle || await bcrypt.compare(password, user.password)
+
+    let checkedPassword = isFromGoogle
+
+    if (!isFromGoogle) {
+      // check if the password in DB is hashed (bcrypt format)
+      const bcryptHashRegex = /^\$2[aby]\$\d{1,2}\$[./A-Za-z0-9]{53}$/
+      const isHashed = bcryptHashRegex.test(user.password)
+
+      if (isHashed) {
+        try {
+          checkedPassword = await bcrypt.compare(password, user.password)
+        } catch (error) {
+          console.error('Bcrypt unexpected error:', error.message)
+          throw createError(500, INTERNAL_SERVER_ERROR)
+        }
+      } else {
+        // if password is not hashed, compare directly and then hash it for future logins
+        checkedPassword = password === user.password
+
+        if (checkedPassword) {
+          // hashing
+          const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
+          await privateUpdateUser(user._id, { password: hashedPassword })
+        }
+      }
+    }
 
     if (!checkedPassword) {
       throw createError(401, INCORRECT_CREDENTIALS)
@@ -115,7 +145,9 @@ const authService = {
     }
 
     const { id: userId, firstName, email } = tokenData
-    await privateUpdateUser(userId, { password })
+    // hash the new password before saving
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
+    await privateUpdateUser(userId, { password: hashedPassword })
 
     await tokenService.removeResetToken(userId)
 
