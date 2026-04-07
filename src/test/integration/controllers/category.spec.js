@@ -1,4 +1,3 @@
-const { serverInit, serverCleanup, stopServer } = require('~/test/setup')
 const { expectError } = require('~/test/helpers')
 const {
   UNAUTHORIZED,
@@ -7,8 +6,7 @@ const {
   FIELD_IS_NOT_OF_PROPER_LENGTH,
   FIELD_ALREADY_EXISTS
 } = require('~/consts/errors')
-const testUserAuthentication = require('~/utils/testUserAuth')
-const { adminUserData, studentUserData, tutorUserData } = require('~/test/helpers/userData')
+const setupControllerTests = require('~/test/helpers/controllerSetup')
 
 const endpointUrl = '/categories/'
 
@@ -21,25 +19,13 @@ const testCategoryData = {
 }
 
 describe('Category controller', () => {
-  let app, server, adminAccessToken, studentAccessToken, tutorAccessToken
-
-  beforeAll(async () => {
-    ;({ app, server } = await serverInit())
-  })
+  // Get the app instance and tokens from the setup function
+  const { getApp, getTokens } = setupControllerTests()
+  let app, token
 
   beforeEach(async () => {
-    // receive access tokens for all user roles before each test
-    adminAccessToken = await testUserAuthentication(app, adminUserData)
-    studentAccessToken = await testUserAuthentication(app, studentUserData)
-    tutorAccessToken = await testUserAuthentication(app, tutorUserData)
-  })
-
-  afterEach(async () => {
-    await serverCleanup()
-  })
-
-  afterAll(async () => {
-    await stopServer(server)
+    app = getApp()
+    token = getTokens()
   })
 
   describe('POST /categories/', () => {
@@ -47,7 +33,7 @@ describe('Category controller', () => {
       const response = await app
         .post(endpointUrl)
         .send(testCategoryData)
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(response.statusCode).toBe(201)
       expect(response._body).toMatchObject({
@@ -61,7 +47,7 @@ describe('Category controller', () => {
       const firstResponse = await app
         .post(endpointUrl)
         .send(testCategoryData)
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(firstResponse.statusCode).toBe(201)
 
@@ -69,7 +55,7 @@ describe('Category controller', () => {
       const secondResponse = await app
         .post(endpointUrl)
         .send(testCategoryData)
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expectError(409, FIELD_ALREADY_EXISTS('name'), secondResponse)
     })
@@ -78,7 +64,7 @@ describe('Category controller', () => {
       const response = await app
         .post(endpointUrl)
         .send(testCategoryData)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expectError(403, FORBIDDEN, response)
     })
@@ -87,7 +73,7 @@ describe('Category controller', () => {
       const response = await app
         .post(endpointUrl)
         .send(testCategoryData)
-        .set('Cookie', [`accessToken=${tutorAccessToken}`])
+        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
 
       expectError(403, FORBIDDEN, response)
     })
@@ -102,7 +88,7 @@ describe('Category controller', () => {
       const response = await app
         .post(endpointUrl)
         .send({ appearance: testCategoryData.appearance })
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expectError(422, FIELD_IS_NOT_DEFINED('name'), response)
     })
@@ -116,7 +102,7 @@ describe('Category controller', () => {
       const response = await app
         .post(endpointUrl)
         .send(invalidData)
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expectError(422, FIELD_IS_NOT_OF_PROPER_LENGTH('name', { min: 1, max: 30 }), response)
     })
@@ -125,7 +111,7 @@ describe('Category controller', () => {
       const response = await app
         .post(endpointUrl)
         .send({ name: 'Brand New Category' })
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(response.statusCode).toBe(201)
       expect(response._body.name).toBe('Brand New Category')

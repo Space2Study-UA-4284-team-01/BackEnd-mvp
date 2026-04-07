@@ -2,6 +2,7 @@ const {
   roles: { ADMIN, STUDENT, TUTOR }
 } = require('~/consts/auth')
 
+// Base user data that can be extended for different roles
 const baseUser = {
   firstName: 'Test',
   lastName: 'User',

@@ -1,4 +1,3 @@
-const { serverInit, serverCleanup, stopServer } = require('~/test/setup')
 const { expectError } = require('~/test/helpers')
 const {
   UNAUTHORIZED,
@@ -7,9 +6,7 @@ const {
   FIELD_IS_NOT_OF_PROPER_LENGTH,
   SUBJECT_ALREADY_EXISTS
 } = require('~/consts/errors')
-
-const testUserAuthentication = require('~/utils/testUserAuth')
-const { adminUserData, studentUserData, tutorUserData } = require('~/test/helpers/userData')
+const setupControllerTests = require('~/test/helpers/controllerSetup')
 
 const endpointUrl = '/subjects/'
 
@@ -19,24 +16,13 @@ const testSubjectData = {
 }
 
 describe('Subject controller', () => {
-  let app, server, adminAccessToken, studentAccessToken, tutorAccessToken
+  // Get the app instance and tokens from the setup function
+  const { getApp, getTokens } = setupControllerTests()
+  let app, token
 
-  beforeAll(async () => {
-    ;({ app, server } = await serverInit())
-  })
-
-  beforeEach(async () => {
-    adminAccessToken = await testUserAuthentication(app, adminUserData)
-    studentAccessToken = await testUserAuthentication(app, studentUserData)
-    tutorAccessToken = await testUserAuthentication(app, tutorUserData)
-  })
-
-  afterEach(async () => {
-    await serverCleanup()
-  })
-
-  afterAll(async () => {
-    await stopServer(server)
+  beforeEach(() => {
+    app = getApp()
+    token = getTokens()
   })
 
   describe('POST /subjects/', () => {
@@ -44,11 +30,11 @@ describe('Subject controller', () => {
       const response = await app
         .post(endpointUrl)
         .send(testSubjectData)
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(response.statusCode).toBe(201)
       expect(response._body.data).toMatchObject({
-        name: testSubjectData.name,
+        name: testSubjectData.name.toLowerCase(),
         description: testSubjectData.description
       })
     })
@@ -57,14 +43,14 @@ describe('Subject controller', () => {
       const firstResponse = await app
         .post(endpointUrl)
         .send(testSubjectData)
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(firstResponse.statusCode).toBe(201)
 
       const secondResponse = await app
         .post(endpointUrl)
         .send(testSubjectData)
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expectError(409, SUBJECT_ALREADY_EXISTS, secondResponse)
     })
@@ -73,7 +59,7 @@ describe('Subject controller', () => {
       const response = await app
         .post(endpointUrl)
         .send(testSubjectData)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expectError(403, FORBIDDEN, response)
     })
@@ -82,7 +68,7 @@ describe('Subject controller', () => {
       const response = await app
         .post(endpointUrl)
         .send(testSubjectData)
-        .set('Cookie', [`accessToken=${tutorAccessToken}`])
+        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
 
       expectError(403, FORBIDDEN, response)
     })
@@ -97,7 +83,7 @@ describe('Subject controller', () => {
       const response = await app
         .post(endpointUrl)
         .send({ description: 'No name' })
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expectError(422, FIELD_IS_NOT_DEFINED('name'), response)
     })
@@ -106,7 +92,7 @@ describe('Subject controller', () => {
       const response = await app
         .post(endpointUrl)
         .send({ name: 'A' })
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expectError(422, FIELD_IS_NOT_OF_PROPER_LENGTH('name', { min: 2, max: 50 }), response)
     })
@@ -115,10 +101,10 @@ describe('Subject controller', () => {
       const response = await app
         .post(endpointUrl)
         .send({ name: 'Physics' })
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(response.statusCode).toBe(201)
-      expect(response._body.data.name).toBe('Physics')
+      expect(response._body.data.name).toBe('Physics'.toLowerCase())
     })
   })
 })
