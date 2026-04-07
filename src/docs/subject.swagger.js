@@ -18,7 +18,7 @@
  *               name:
  *                 type: string
  *                 minLength: 2
- *                 maxLength: 50
+ *                 maxLength: 30
  *               description:
  *                 type: string
  *                 description: Optional description of the subject

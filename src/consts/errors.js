@@ -103,6 +103,10 @@ const errors = {
     code: 'INVALID_LANGUAGE',
     message: `The language name is invalid. Possible options: ${APP_LANG_ENUM.join(', ')}.`
   },
+  CATEGORY_NOT_FOUND: {
+    code: 'CATEGORY_NOT_FOUND',
+    message: 'Category with the specified ID was not found.'
+  },
   SUBJECT_ALREADY_EXISTS: {
     code: 'SUBJECT_ALREADY_EXISTS',
     message: 'Subject with the specified name already exists.'

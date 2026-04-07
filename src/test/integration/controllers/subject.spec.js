@@ -1,3 +1,7 @@
+const mongoose = require('mongoose')
+
+jest.mock('~/models/category')
+
 const { expectError } = require('~/test/helpers')
 const {
   UNAUTHORIZED,
@@ -7,22 +11,31 @@ const {
   SUBJECT_ALREADY_EXISTS
 } = require('~/consts/errors')
 const setupControllerTests = require('~/test/helpers/controllerSetup')
+const Category = require('~/models/category')
 
 const endpointUrl = '/subjects/'
-
-const testSubjectData = {
-  name: 'Mathematics',
-  description: 'Basic math subject'
-}
 
 describe('Subject controller', () => {
   // Get the app instance and tokens from the setup function
   const { getApp, getTokens } = setupControllerTests()
   let app, token
 
+  const validCategoryId = new mongoose.Types.ObjectId().toString()
+
+  const testSubjectData = {
+    name: 'Mathematics',
+    category: validCategoryId
+  }
+
   beforeEach(() => {
     app = getApp()
     token = getTokens()
+
+    // Mock the Category.findById method to return a valid category for testing
+    Category.findById.mockResolvedValue({
+      _id: validCategoryId,
+      name: 'Test Category'
+    })
   })
 
   describe('POST /subjects/', () => {
@@ -34,8 +47,8 @@ describe('Subject controller', () => {
 
       expect(response.statusCode).toBe(201)
       expect(response._body.data).toMatchObject({
-        name: testSubjectData.name.toLowerCase(),
-        description: testSubjectData.description
+        name: testSubjectData.name,
+        category: testSubjectData.category
       })
     })
 
@@ -82,29 +95,19 @@ describe('Subject controller', () => {
     it('should return 422 for missing name', async () => {
       const response = await app
         .post(endpointUrl)
-        .send({ description: 'No name' })
+        .send({ category: validCategoryId })
         .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expectError(422, FIELD_IS_NOT_DEFINED('name'), response)
     })
 
-    it('should return 422 for too short name', async () => {
+    it('should return 422 for too long name', async () => {
+      const longName = 'A'.repeat(31)
       const response = await app
         .post(endpointUrl)
-        .send({ name: 'A' })
+        .send({ name: longName, category: validCategoryId })
         .set('Cookie', [`accessToken=${token.adminAccessToken}`])
-
-      expectError(422, FIELD_IS_NOT_OF_PROPER_LENGTH('name', { min: 2, max: 50 }), response)
-    })
-
-    it('should allow missing description', async () => {
-      const response = await app
-        .post(endpointUrl)
-        .send({ name: 'Physics' })
-        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
-
-      expect(response.statusCode).toBe(201)
-      expect(response._body.data.name).toBe('Physics'.toLowerCase())
+      expectError(422, FIELD_IS_NOT_OF_PROPER_LENGTH('name', { min: 1, max: 30 }), response)
     })
   })
 })
