@@ -14,12 +14,14 @@ const subjectService = {
       validateFunc.required('name', true, name)
       validateFunc.type('name', 'string', name)
 
+      // Sanitize and normalize the name before validation and saving
       const sanitizedName = mongosanitize(name)
       const normalizedName = String(sanitizedName).trim()
       validateFunc.length('name', { min: 1, max: 30 }, normalizedName)
 
       validateFunc.required('category', true, category)
 
+      // Validate that category is a valid ObjectId
       if (!mongoose.Types.ObjectId.isValid(category)) {
         throw createError(422, errors.FIELD_IS_NOT_OF_PROPER_TYPE('category', 'ObjectId'))
       }
