@@ -1,0 +1,22 @@
+doctype html
+html
+  head
+    style.
+      .button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+  body
+    h2 Hello #{firstName}!
+    p Welcome to Space2Study. Please confirm your email by clicking the button below:
+    a.button(href=`http://localhost:3000/confirm-email/${confirmToken}`) Confirm Email
+    p If the button doesn't work, copy and paste this link:
+    p http://localhost:3000/confirm-email/#{confirmToken}

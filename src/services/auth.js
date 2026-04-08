@@ -5,43 +5,49 @@ const { createError } = require('~/utils/errorsHelper')
 const {
   EMAIL_NOT_CONFIRMED,
   INCORRECT_CREDENTIALS,
+  INTERNAL_SERVER_ERROR,
   BAD_RESET_TOKEN,
   BAD_CONFIRM_TOKEN,
   BAD_REFRESH_TOKEN,
   USER_NOT_FOUND,
-  ALREADY_REGISTERED // Переконайся, що ця константа є в consts/errors
+  ALREADY_REGISTERED
 } = require('~/consts/errors')
 const emailSubject = require('~/consts/emailSubject')
+
+// Імпортуємо назви токенів
 const {
   tokenNames: { REFRESH_TOKEN, RESET_TOKEN, CONFIRM_TOKEN }
 } = require('~/consts/auth')
 
+const bcrypt = require('bcrypt')
+
+// Безпечний імпорт SALT_ROUNDS: беремо з констант або використовуємо 10 за замовчуванням
+const authConsts = require('~/consts/auth')
+const SALT_ROUNDS = authConsts.SALT_ROUNDS || 10
+
 const authService = {
   signup: async (role, firstName, lastName, email, password, language) => {
-    // 1. ПЕРЕВІРКА: чи існує вже такий користувач (щоб база не кидала 500)
+    // 1. Перевіряємо, чи такий email вже існує
     const existingUser = await getUserByEmail(email)
     if (existingUser) {
       throw createError(409, ALREADY_REGISTERED)
     }
 
-    // 2. СТВОРЕННЯ КОРИСТУВАЧА
+    // 2. Створюємо нового користувача
     const user = await createUser(role, firstName, lastName, email, password, language)
 
-    // 3. ГЕНЕРАЦІЯ ТА ЗБЕРЕЖЕННЯ ТОКЕНА ПІДТВЕРДЖЕННЯ
+    // 3. Генеруємо та зберігаємо токен підтвердження
     const confirmToken = tokenService.generateConfirmToken({ id: user._id, role })
     await tokenService.saveToken(user._id, confirmToken, CONFIRM_TOKEN)
 
-    // 4. ВІДПРАВКА EMAIL (з обробкою помилки, щоб signup не падав через пошту)
+    // 4. Відправляємо лист (з детальним логуванням помилок)
     try {
-      await emailService.sendEmail(email, emailSubject.EMAIL_CONFIRMATION, language, {
-        confirmToken,
-        email,
-        firstName
-      })
+      await emailService.sendEmail(email, emailSubject.EMAIL_CONFIRMATION, language, { confirmToken, email, firstName })
+      console.log(`[EmailService] Confirmation email sent to ${email}`)
     } catch (e) {
-      console.error('Email sending failed:', e.message)
-      // Ми не кидаємо помилку тут, щоб користувач все одно міг зареєструватися,
-      // навіть якщо пошта тимчасово лежить
+      console.error('--- EMAIL SENDING FAILED ---')
+      console.error('Error details:', e)
+      console.error('---------------------------')
     }
 
     return {
@@ -59,7 +65,7 @@ const authService = {
     }
 
     await privateUpdateUser(tokenData.id, { isEmailConfirmed: true })
-    await tokenService.removeConfirmToken(tokenData.id)
+    await tokenService.saveToken(tokenData.id, null, CONFIRM_TOKEN)
   },
 
   login: async (email, password, isFromGoogle) => {
@@ -69,8 +75,31 @@ const authService = {
       throw createError(401, USER_NOT_FOUND)
     }
 
-    // В ідеалі тут має бути bcrypt.compare(password, user.password)
-    const checkedPassword = password.trim() === user.password.trim() || isFromGoogle
+    let checkedPassword = isFromGoogle
+
+    if (!isFromGoogle) {
+      // Перевіряємо, чи захешований пароль у базі (формат bcrypt)
+      const bcryptHashRegex = /^\$2[aby]\$\d{1,2}\$[./A-Za-z0-9]{53}$/
+      const isHashed = bcryptHashRegex.test(user.password)
+
+      if (isHashed) {
+        try {
+          checkedPassword = await bcrypt.compare(password, user.password)
+        } catch (error) {
+          console.error('Bcrypt unexpected error:', error.message)
+          throw createError(500, INTERNAL_SERVER_ERROR)
+        }
+      } else {
+        // Якщо пароль ще не захешований (стара версія), порівнюємо напряму
+        checkedPassword = password === user.password
+
+        if (checkedPassword) {
+          // Хешуємо його для безпеки на майбутнє
+          const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
+          await privateUpdateUser(user._id, { password: hashedPassword })
+        }
+      }
+    }
 
     if (!checkedPassword) {
       throw createError(401, INCORRECT_CREDENTIALS)
@@ -78,6 +107,7 @@ const authService = {
 
     const { _id, lastLoginAs, isFirstLogin, isEmailConfirmed } = user
 
+    // Перевірка підтвердження пошти
     if (!isEmailConfirmed) {
       throw createError(401, EMAIL_NOT_CONFIRMED)
     }
@@ -138,7 +168,10 @@ const authService = {
     }
 
     const { id: userId, firstName, email } = tokenData
-    await privateUpdateUser(userId, { password })
+
+    // Хешуємо новий пароль перед збереженням
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
+    await privateUpdateUser(userId, { password: hashedPassword })
 
     await tokenService.removeResetToken(userId)
 

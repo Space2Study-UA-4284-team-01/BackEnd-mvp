@@ -5,6 +5,9 @@ const validationMiddleware = require('~/middlewares/validation')
 const langMiddleware = require('~/middlewares/appLanguage')
 
 const authController = require('~/controllers/auth')
+// ДОДАНО: імпортуємо твій контролер для Google
+const { googleLogin } = require('~/controllers/googleAuth')
+
 const signupValidationSchema = require('~/validation/schemas/signup')
 const { loginValidationSchema } = require('~/validation/schemas/login')
 const resetPasswordValidationSchema = require('~/validation/schemas/resetPassword')
@@ -32,11 +35,9 @@ router.patch(
   asyncWrapper(authController.updatePassword)
 )
 // confirm email route /auth/confirm-email
-router.get(
-  '/confirm-email/:confirmToken', 
-  langMiddleware, 
-  asyncWrapper(authController.confirmEmail)
-)
+router.get('/confirm-email/:confirmToken', langMiddleware, asyncWrapper(authController.confirmEmail))
 
+// ДОДАНО: маршрут, який так довго шукав твій фронтенд
+router.post('/google-login', langMiddleware, asyncWrapper(googleLogin))
 
 module.exports = router
