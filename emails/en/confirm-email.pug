@@ -1,22 +1,100 @@
 doctype html
 html
   head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
     style.
-      .button {
-        background-color: #4CAF50;
-        border: none;
-        color: white;
-        padding: 15px 32px;
+      body {
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 40px 0;
+        font-family: 'Open Sans', Arial, sans-serif;
+      }
+      .wrapper {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 60px 40px;
         text-align: center;
+        border-radius: 4px;
+      }
+      .logo-box {
+        margin-bottom: 40px;
+        height: 30px;
+      }
+      .logo-img {
+        height: 30px;
+        width: auto;
+      }
+      .title {
+        color: #263238;
+        font-size: 36px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin: 0 0 32px 0;
+      }
+      .text {
+        color: #263238;
+        font-size: 18px;
+        line-height: 1.6;
+        margin-bottom: 40px;
+      }
+      .button {
+        background-color: #263238;
+        color: #ffffff !important;
+        padding: 16px 40px;
         text-decoration: none;
         display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        cursor: pointer;
+        font-size: 18px;
+        font-weight: 700;
+        border-radius: 4px;
       }
+      .divider {
+        margin: 60px auto 40px;
+        width: 100%;
+        max-width: 480px;
+        border-top: 1px solid #eceff1;
+      }
+      .info-text {
+        color: #607d8b;
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 8px;
+      }
+      .user-email {
+        color: #263238;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .footer {
+        padding: 40px;
+        text-align: center;
+        color: #263238;
+        font-size: 14px;
+      }
+      .footer-title {
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
   body
-    h2 Hello #{firstName}!
-    p Welcome to Space2Study. Please confirm your email by clicking the button below:
-    a.button(href=`http://localhost:3000/confirm-email/${confirmToken}`) Confirm Email
-    p If the button doesn't work, copy and paste this link:
-    p http://localhost:3000/confirm-email/#{confirmToken}
+    div.wrapper
+      div.logo-box
+        //- Повний Base64 код логотипа Space2Study
+        img.logo-img(src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAxNDQgMjQiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik03LjIgMTcuNmMxLjc2NyAwIDMuMi0xLjQzMyAzLjItMy4ycy0xLjQzMy0zLjItMy4yLTMuMi0zLjIgMS40MzMtMy4yIDMuMiAxLjQzMyAzLjIgMy4yIDMuMnoiIGZpbGw9IiNGMUJDMTkiLz48cGF0aCBkPSJNMTQuOCAyMGMxLjEwNSAwIDItLjg5NSAyLTJzLS44OTUtMi0yLTItMiAuODk1LTIgMiAuODk1IDIgMiAyeiIgZmlsbD0iI0VFM0U1NCIvPjxwYXRoIGQ9Ik0xNS4yIDEzLjZjMi42NTEgMCA0LjgtMi4xNDkgNC44LTQuOHMtMi4xNDktNC44LTQuOC00LjgtNC44IDIuMTQ5LTQuOCA0LjggMi4xNDkgNC44IDQuOCA0Ljh6IiBmaWxsPSIjMDBBN0E3Ii8+PHBhdGggZD0iTTQyLjc2IDE0LjhjMCAxLjIyNy0uNDIgMi4yMzMtMS4yNiAzLjAyLS44NCAuNzg3LTIuMDQ3IDEuMTgtMy42MiAxLjE4LTEuNTczIDAtMi42OC0uMjI3LTMuMzItLjY4LS42NC0uNDY3LS45Ni0uOTgtLjk2LTEuNTQgMCAuNTA3LjA2Ny44NzMuMiAxLjA5My4yMjcuMzg3LjQ0Ny42NDcuNjYgLjc4LjUyLjM4NyAxLjExMy43NCAxLjc4IDEuMDYuNjg3LjMyIDEuMi40OCAxLjU0Ni40OC4zNDcgMCAuNTkzLS4wMzMuNzQtLjEuMTQ3LS4wNjcuMjM0LS4xMzMuMjYtLjIuMDI3LS4wOC4wNC0uMTg3LjA0LS4zMiAwLS4yNTMtLjE4LS40OTMtLjU0LS43Mi0uMzYtLjI0LS44LS40OC0xLjMyLS43Mi0uNTA3LS4yNTMtMS4wMTMtLjUzMy0xLjUyLS44NGEzLjMyOSAzLjMyOSAwIDAgMS0xLjMtMS4zMWMtLjM2LS41NDYtLjU0LTEuMTQ2LS41NC0xLjh2LS4wODVjMC0uNjY3LjE1My0xLjI4LjQ2LTEuODRhNC44NCA0Ljg0IDAgMCAxIDEuMTYtMS4zOGMuMDI3LS42NC40MDctMS4yMTMgMS4xNC0xLjcyLjczNC0uNTA3IDEuNzU0LS43NiAzLjA0Ny0uNzYgMi4zNzMgMCAzLjU2IDkuOTMzIDMuNTYgMTEuOTMzdi4wODV6IiBmaWxsPSIjMzc0NzRGQiIvPjwvc3ZnPg==" alt="Space2Study")
+      
+      h1.title Thank you for joining us
+      
+      p.text #{firstName}, please take a second to make sure we've got your email right.
+      
+      //- Посилання з токеном
+      a.button(href=`http://localhost:3000/confirm-email?token=${confirmToken}`) Confirm your email
+      
+      div.divider
+      
+      p.info-text This is an automated email. Do not reply to this. You received this email because you are registered with SpaceToStudy at
+      a.user-email(href=`mailto:${email}`) #{email}
+
+    div.footer
+      div.footer-title SpaceToStudy
+      div © 2026 SpaceToStudy. All rights reserved.

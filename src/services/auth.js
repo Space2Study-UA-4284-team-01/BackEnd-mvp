@@ -57,15 +57,29 @@ const authService = {
   },
 
   confirmEmail: async (confirmToken) => {
+    console.log('\n--- 🚀 ПОЧАТОК ПІДТВЕРДЖЕННЯ ПОШТИ ---')
+    console.log('1. Токен, який прийшов:', confirmToken)
+
     const tokenData = tokenService.validateConfirmToken(confirmToken)
+    console.log('2. Розшифровані дані токена:', tokenData)
+
     const tokenFromDB = await tokenService.findToken(confirmToken, CONFIRM_TOKEN)
+    console.log('3. Чи знайдено токен у базі?', !!tokenFromDB)
 
     if (!tokenData || !tokenFromDB) {
+      console.log('❌ ПОМИЛКА: Токен недійсний або його немає в базі')
       throw createError(400, BAD_CONFIRM_TOKEN)
     }
 
-    await privateUpdateUser(tokenData.id, { isEmailConfirmed: true })
+    console.log('4. Оновлюємо статус юзера з ID:', tokenData.id)
+
+    // Викликаємо оновлення
+    const result = await privateUpdateUser(tokenData.id, { isEmailConfirmed: true })
+    console.log('5. Результат оновлення бази:', result)
+
     await tokenService.saveToken(tokenData.id, null, CONFIRM_TOKEN)
+    console.log('✅ УСПІХ: Пошту підтверджено, токен видалено!')
+    console.log('--------------------------------------\n')
   },
 
   login: async (email, password, isFromGoogle) => {
