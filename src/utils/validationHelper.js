@@ -38,12 +38,19 @@ const validateEnum = (schemaFieldKey, enumSet, field) => {
   }
 }
 
+const validateNumber = (schemaFieldKey, field) => {
+  if (Number.isNaN(Number(field))) {
+    throw createError(422, FIELD_IS_NOT_OF_PROPER_TYPE(schemaFieldKey, 'number'))
+  }
+}
+
 const validateFunc = {
   required: validateRequired,
   type: validateType,
   length: validateLength,
   regex: validateRegex,
-  enum: validateEnum
+  enum: validateEnum,
+  number: validateNumber
 }
 
 module.exports = {
