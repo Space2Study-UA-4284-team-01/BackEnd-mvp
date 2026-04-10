@@ -22,4 +22,3 @@ module.exports = {
   tokenNames,
   SALT_ROUNDS
 }
-

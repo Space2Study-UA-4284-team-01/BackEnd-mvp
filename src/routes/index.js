@@ -9,11 +9,11 @@ const resourcesCategory = require('~/routes/resourcesCategory')
 const category = require('~/routes/category')
 const offer = require('~/routes/offer')
 const googleAuth = require('~/routes/googleAuth')
+const subject = require('~/routes/subject')
 const location = require('~/routes/location')
 
-
 router.use('/auth', auth)
-router.use('/auth/google-auth', googleAuth) 
+router.use('/auth/google-auth', googleAuth)
 router.use('/location', location)
 router.use('/users', user)
 router.use('/send-email', email)
@@ -22,5 +22,6 @@ router.use('/questions', question)
 router.use('/resources-categories', resourcesCategory)
 router.use('/categories', category)
 router.use('/offers', offer)
+router.use('/subjects', subject)
 
 module.exports = router

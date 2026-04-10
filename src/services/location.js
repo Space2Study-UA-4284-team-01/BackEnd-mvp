@@ -1,7 +1,8 @@
 const {
   config: { CSC_API_KEY, CSC_API_URL = 'https://api.countrystatecity.in/v1' }
 } = require('~/configs/config')
-const { createError } = require('~/utils/errorsHelper') 
+const { createError } = require('~/utils/errorsHelper')
+// eslint-disable-next-line no-unused-vars
 const { EXTERNAL_SERVICE_ERROR, NOT_FOUND } = require('~/consts/errors')
 
 const headers = {
@@ -51,13 +52,10 @@ const locationService = {
 
     const citiesPromises = states.map(async (state) => {
       try {
-        const res = await fetch(
-          `${CSC_API_URL}/countries/${countryIso}/states/${state.iso2}/cities`,
-          {
-            method: 'GET',
-            headers
-          }
-        )
+        const res = await fetch(`${CSC_API_URL}/countries/${countryIso}/states/${state.iso2}/cities`, {
+          method: 'GET',
+          headers
+        })
 
         if (!res.ok) {
           console.error(`Failed to fetch cities for state ${state.iso2}: ${res.statusText}`)

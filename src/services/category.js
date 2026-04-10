@@ -5,21 +5,21 @@ const { FIELD_ALREADY_EXISTS } = require('~/consts/errors')
 
 const categoryService = {
   createCategory: async (data) => {
-        const { name, appearance } = data
-        
-        validateFunc.required('name', true, name)
-        validateFunc.length('name', { min: 1, max: 30 }, name)
+    const { name, appearance } = data
 
-        const existingCategory = await Category.findOne({ name })
+    validateFunc.required('name', true, name)
+    validateFunc.length('name', { min: 1, max: 30 }, name)
 
-        if (existingCategory) {
-        throw createError(409, FIELD_ALREADY_EXISTS('name'))
-        }
+    const existingCategory = await Category.findOne({ name })
 
-        return await Category.create({
-        name,
-        appearance
-        })
+    if (existingCategory) {
+      throw createError(409, FIELD_ALREADY_EXISTS('name'))
+    }
+
+    return await Category.create({
+      name,
+      appearance
+    })
   }
 }
 

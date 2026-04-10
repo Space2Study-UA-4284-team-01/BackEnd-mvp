@@ -59,14 +59,9 @@ describe('Location Service Unit Tests', () => {
 
       const result = await locationService.getCitiesByCountry(countryIso)
 
-     
       // is the result a combined list of cities from both states?
       // is it sorted alphabetically by city name?
-      expect(result).toEqual([
-        { name: 'Boryspil' },
-        { name: 'Kyiv' },
-        { name: 'Lviv' }
-      ])
+      expect(result).toEqual([{ name: 'Boryspil' }, { name: 'Kyiv' }, { name: 'Lviv' }])
 
       // check that 3 fetch calls were made: 1 for states + 2 for cities
       expect(globalThis.fetch).toHaveBeenCalledTimes(3)

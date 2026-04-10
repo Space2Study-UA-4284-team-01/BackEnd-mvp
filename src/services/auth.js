@@ -7,7 +7,7 @@ const {
   INCORRECT_CREDENTIALS,
   INTERNAL_SERVER_ERROR,
   BAD_RESET_TOKEN,
-  BAD_CONFIRM_TOKEN, 
+  BAD_CONFIRM_TOKEN,
   BAD_REFRESH_TOKEN,
   USER_NOT_FOUND
 } = require('~/consts/errors')
@@ -40,7 +40,7 @@ const authService = {
     }
 
     await privateUpdateUser(tokenData.id, { isEmailConfirmed: true })
-    await tokenService.saveToken(tokenData.id, null, CONFIRM_TOKEN) 
+    await tokenService.saveToken(tokenData.id, null, CONFIRM_TOKEN)
   },
 
   login: async (email, password, isFromGoogle) => {
@@ -69,7 +69,7 @@ const authService = {
         }
       } else {
         // if password is not hashed, compare directly and then hash it for future logins
-        checkedPassword = (password === user.password)
+        checkedPassword = password === user.password
 
         if (checkedPassword) {
           // hashing
@@ -78,7 +78,6 @@ const authService = {
         }
       }
     }
-    
 
     if (!checkedPassword) {
       throw createError(401, INCORRECT_CREDENTIALS)

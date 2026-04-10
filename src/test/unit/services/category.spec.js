@@ -28,7 +28,7 @@ describe('Category service', () => {
         ...categoryData,
         totalOffers: { student: 0, tutor: 0 }
       }
-        
+
       // mock Category.create to return the created category
       Category.create.mockResolvedValue(createdCategory)
 

@@ -8,7 +8,7 @@ const getCountries = async (_req, res) => {
 const getCitiesByCountry = async (req, res) => {
   const { countryIso } = req.params
   const cities = await locationService.getCitiesByCountry(countryIso)
-  
+
   res.status(200).json(cities)
 }
 
@@ -16,4 +16,3 @@ module.exports = {
   getCountries,
   getCitiesByCountry
 }
-

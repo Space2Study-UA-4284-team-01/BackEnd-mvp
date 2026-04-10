@@ -1,6 +1,7 @@
 const swaggerJsdoc = require('swagger-jsdoc')
 
 const {
+  // eslint-disable-next-line no-unused-vars
   config: { SERVER_PORT }
 } = require('~/configs/config')
 
