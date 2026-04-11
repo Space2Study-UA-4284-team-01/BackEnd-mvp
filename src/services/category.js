@@ -42,6 +42,15 @@ const categoryService = {
     const [result] = await Category.aggregate(pipeline)
 
     return result
+  },
+
+  getCategoriesNames: async () => {
+    const categories = await Category
+      .find({})
+      .select('name')
+      .lean()
+    
+    return categories.map(({ name }) => name)
   }
 }
 

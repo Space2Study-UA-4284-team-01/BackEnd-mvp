@@ -207,3 +207,29 @@
  *                   type: string
  *                   example: "name cannot be shorter than 1 and longer than 30 characters."
  */
+/**
+ * @swagger
+ * /categories/names:
+ *   get:
+ *     summary: Get all category names
+ *     description: Returns a list of all category names. Accessible to all authenticated users.
+ *     tags:
+ *       - Category
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of category names retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Mathematics", "Physics", "Chemistry"]
+ *       401:
+ *         description: Unauthorized - Access token is missing or invalid
+ */
