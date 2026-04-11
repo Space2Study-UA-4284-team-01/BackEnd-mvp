@@ -272,4 +272,59 @@ describe('Category controller', () => {
       expect(response._body.count).toBe(0)
     })
   })
+
+  describe('GET /categories/names', () => {
+    it('should return categories names for authenticated user', async () => {
+      // 1. create category first
+      await app
+        .post(endpointUrl)
+        .send(testCategoryData)
+        .set('Cookie', [`accessToken=${adminAccessToken}`])
+
+      // 2. get names
+      const response = await app
+        .get('/categories/names')
+        .set('Cookie', [`accessToken=${adminAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body.data).toEqual(
+        expect.arrayContaining([testCategoryData.name])
+      )
+    })
+
+    it('should return empty array when no categories exist', async () => {
+      const response = await app
+        .get('/categories/names')
+        .set('Cookie', [`accessToken=${adminAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body.data).toEqual([])
+    })
+
+    it('should return 401 for unauthenticated user', async () => {
+      const response = await app
+        .get('/categories/names')
+
+      expectError(401, UNAUTHORIZED, response)
+    })
+
+    it('should allow all authenticated roles to access names', async () => {
+      const adminRes = await app
+        .get('/categories/names')
+        .set('Cookie', [`accessToken=${adminAccessToken}`])
+
+      const studentRes = await app
+        .get('/categories/names')
+        .set('Cookie', [`accessToken=${studentAccessToken}`])
+
+      const tutorRes = await app
+        .get('/categories/names')
+        .set('Cookie', [`accessToken=${tutorAccessToken}`])
+
+      expect(adminRes.statusCode).toBe(200)
+      expect(studentRes.statusCode).toBe(200)
+      expect(tutorRes.statusCode).toBe(200)
+    })
+  })
+
 })
