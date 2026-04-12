@@ -1,12 +1,26 @@
-const mongoose = require('mongoose')
 const Subject = require('~/models/subject')
 const Category = require('~/models/category')
 const errors = require('~/consts/errors')
 const { createError } = require('~/utils/errorsHelper')
 const { validateFunc } = require('~/utils/validationHelper')
 const mongosanitize = require('mongo-sanitize')
+const { validateObjectId } = require('~/utils/helper/validateObjectId')
+const handleServiceError = require('~/utils/helper/handleServiceError')
 
 const subjectService = {
+  getSubjectById: async (id) => {
+    try {
+      validateObjectId(id, 'id')
+      const subject = await Subject.findById(id).populate('category', 'name')
+      if (!subject) {
+        throw createError(404, errors.SUBJECT_NOT_FOUND)
+      }
+      return subject
+    } catch (err) {
+      handleServiceError(err, 'Failed to get subject by id')
+    }
+  },
+
   createSubject: async (data) => {
     try {
       const { name, category } = data
@@ -22,9 +36,7 @@ const subjectService = {
       validateFunc.required('category', true, category)
 
       // Validate that category is a valid ObjectId
-      if (!mongoose.Types.ObjectId.isValid(category)) {
-        throw createError(422, errors.FIELD_IS_NOT_OF_PROPER_TYPE('category', 'ObjectId'))
-      }
+      validateObjectId(category, 'category')
 
       const categoryExists = await Category.findById(category)
       if (!categoryExists) {
@@ -37,10 +49,7 @@ const subjectService = {
       }
       return await Subject.create({ ...data, name: normalizedName })
     } catch (err) {
-      if (err.status) throw err
-      const message = err.message || errors.MONGO_SERVER_ERROR('Failed to create subject')
-
-      throw createError(500, message)
+      handleServiceError(err, 'Failed to create subject')
     }
   }
 }

@@ -1,6 +1,69 @@
 /**
  * @swagger
- * /subjects:
+ * /subjects/{id}:
+ *   get:
+ *     summary: Get subject by ID
+ *     description: Retrieves a subject by its ID. Available for all authenticated users.
+ *     tags: [Subjects]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *         description: MongoDB ObjectId of the subject
+ *     responses:
+ *       200:
+ *         description: Subject retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       description: Subject ID
+ *                     name:
+ *                       type: string
+ *                       description: Subject name
+ *                     category:
+ *                       type: string
+ *                       description: Category ObjectId
+ *                     totalOffers:
+ *                       type: object
+ *                       properties:
+ *                         student:
+ *                           type: integer
+ *                           example: 0
+ *                         tutor:
+ *                           type: integer
+ *                           example: 0
+ *       401:
+ *         description: Unauthorized - user is not authenticated
+ *       404:
+ *         description: Subject with the specified ID was not found
+ *       422:
+ *         description: Validation error - invalid ID format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 422
+ *                 message:
+ *                   type: string
+ *                   example: Invalid ID format
+ *       500:
+ *         description: Internal server error
+ *
  *   post:
  *     summary: Create a new subject
  *     description: Creates a new subject. Available only for admin and super admin users.

@@ -111,6 +111,10 @@ const errors = {
     code: 'SUBJECT_ALREADY_EXISTS',
     message: 'Subject with the specified name already exists.'
   },
+  SUBJECT_NOT_FOUND: {
+    code: 'SUBJECT_NOT_FOUND',
+    message: 'Subject with the specified ID was not found.'
+  },
   DOCUMENT_NOT_FOUND: (document) => ({
     code: 'DOCUMENT_NOT_FOUND',
     message: `${document} with the specified ${document.length > 1 ? 'IDs were' : 'ID was'} not found.`

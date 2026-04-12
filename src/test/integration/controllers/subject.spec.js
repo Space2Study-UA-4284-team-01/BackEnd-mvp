@@ -1,14 +1,14 @@
 const mongoose = require('mongoose')
 
-jest.mock('~/models/category')
-
 const { expectError } = require('~/test/helpers')
 const {
   UNAUTHORIZED,
   FORBIDDEN,
   FIELD_IS_NOT_DEFINED,
   FIELD_IS_NOT_OF_PROPER_LENGTH,
-  SUBJECT_ALREADY_EXISTS
+  SUBJECT_ALREADY_EXISTS,
+  FIELD_IS_NOT_OF_PROPER_TYPE,
+  SUBJECT_NOT_FOUND
 } = require('~/consts/errors')
 const setupControllerTests = require('~/test/helpers/controllerSetup')
 const Category = require('~/models/category')
@@ -20,21 +20,73 @@ describe('Subject controller', () => {
   const { getApp, getTokens } = setupControllerTests()
   let app, token
 
-  const validCategoryId = new mongoose.Types.ObjectId().toString()
+  let validCategoryId
+  let testSubjectData
 
-  const testSubjectData = {
-    name: 'Mathematics',
-    category: validCategoryId
-  }
-
-  beforeEach(() => {
+  beforeEach(async () => {
     app = getApp()
     token = getTokens()
 
-    // Mock the Category.findById method to return a valid category for testing
-    Category.findById.mockResolvedValue({
-      _id: validCategoryId,
+    // Create a category to use for subject creation
+    const category = await Category.create({
       name: 'Test Category'
+    })
+
+    validCategoryId = category._id.toString()
+
+    testSubjectData = {
+      name: 'Mathematics',
+      category: validCategoryId
+    }
+  })
+
+  describe('GET /subjects/:id', () => {
+    it('should return subject data for valid id', async () => {
+      const createdSubjectResponse = await app
+        .post(endpointUrl)
+        .send(testSubjectData)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      // Extract the created subject ID from the response
+      const subjectId = createdSubjectResponse.body.data._id
+
+      const response = await app
+        .get(`${endpointUrl}${subjectId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body.data).toMatchObject({
+        _id: subjectId,
+        name: testSubjectData.name,
+        category: {
+          _id: validCategoryId,
+          name: 'Test Category'
+        }
+      })
+    })
+
+    it('should return 404 for non-existing subject', async () => {
+      const nonExistingId = new mongoose.Types.ObjectId().toString()
+      const response = await app
+        .get(`${endpointUrl}${nonExistingId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      expectError(404, SUBJECT_NOT_FOUND, response)
+    })
+
+    it('should return 422 for invalid id format', async () => {
+      const invalidId = '12345'
+      const response = await app
+        .get(`${endpointUrl}${invalidId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      expectError(422, FIELD_IS_NOT_OF_PROPER_TYPE('id', 'ObjectId'), response)
+    })
+
+    it('should return 401 for unauthenticated user', async () => {
+      const response = await app.get(`${endpointUrl}${new mongoose.Types.ObjectId().toString()}`)
+
+      expectError(401, UNAUTHORIZED, response)
     })
   })
 
