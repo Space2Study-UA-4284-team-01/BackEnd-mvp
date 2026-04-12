@@ -2,6 +2,11 @@ const subjectService = require('~/services/subject')
 const errors = require('~/consts/errors')
 const { createError } = require('~/utils/errorsHelper')
 
+const getSubjects = async (req, res) => {
+  const subjects = await subjectService.getSubjects(req.query)
+  res.status(200).json({ data: subjects })
+}
+
 const createSubject = async (req, res) => {
   if (!req.body || Object.keys(req.body).length === 0) {
     throw createError(422, errors.BODY_IS_NOT_DEFINED)
@@ -13,5 +18,6 @@ const createSubject = async (req, res) => {
 }
 
 module.exports = {
-  createSubject
+  createSubject,
+  getSubjects
 }

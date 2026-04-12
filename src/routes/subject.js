@@ -5,6 +5,9 @@ const subjectController = require('~/controllers/subject')
 const { ADMIN, SUPERADMIN } = require('~/consts/auth').roles
 
 router.use(authMiddleware)
+
+router.get('/', asyncWrapper(subjectController.getSubjects))
+
 router.use(restrictTo(ADMIN, SUPERADMIN))
 
 router.post('/', asyncWrapper(subjectController.createSubject))
