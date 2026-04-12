@@ -22,6 +22,7 @@ describe('Subject controller', () => {
 
   let validCategoryId
   let testSubjectData
+  let subjectId
 
   beforeEach(async () => {
     app = getApp()
@@ -41,18 +42,22 @@ describe('Subject controller', () => {
   })
 
   describe('GET /subjects/:id', () => {
-    it('should return subject data for valid id', async () => {
-      const createdSubjectResponse = await app
+    beforeEach(async () => {
+      // Create a subject to test retrieval
+      const created = await app
         .post(endpointUrl)
         .send(testSubjectData)
         .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
-      // Extract the created subject ID from the response
-      const subjectId = createdSubjectResponse.body.data._id
+      subjectId = created.body.data._id
+    })
 
-      const response = await app
-        .get(`${endpointUrl}${subjectId}`)
-        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+    it.each([
+      ['admin', 'adminAccessToken'],
+      ['student', 'studentAccessToken'],
+      ['tutor', 'tutorAccessToken']
+    ])('should return subject data for valid id for %s user', async (_role, tokenKey) => {
+      const response = await app.get(`${endpointUrl}${subjectId}`).set('Cookie', [`accessToken=${token[tokenKey]}`])
 
       expect(response.statusCode).toBe(200)
       expect(response.body.data).toMatchObject({

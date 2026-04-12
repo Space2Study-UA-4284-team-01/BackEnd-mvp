@@ -28,13 +28,17 @@
  *                   properties:
  *                     _id:
  *                       type: string
- *                       description: Subject ID
  *                     name:
  *                       type: string
- *                       description: Subject name
  *                     category:
- *                       type: string
- *                       description: Category ObjectId
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           description: Category ID
+ *                         name:
+ *                           type: string
+ *                           description: Category name
  *                     totalOffers:
  *                       type: object
  *                       properties:
@@ -64,6 +68,7 @@
  *       500:
  *         description: Internal server error
  *
+ * /subjects:
  *   post:
  *     summary: Create a new subject
  *     description: Creates a new subject. Available only for admin and super admin users.
