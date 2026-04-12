@@ -52,6 +52,29 @@ describe('Subject controller', () => {
         .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(200)
+
+      response.body.data.forEach((subject) => {
+        expect(subject.category).toBeDefined()
+
+        if (typeof subject.category === 'object') {
+          expect(subject.category._id.toString()).toBe(validCategoryId)
+        } else {
+          expect(subject.category).toBe(validCategoryId)
+        }
+      })
+    })
+
+    it('should filter by name', async () => {
+      const subjectName = 'Math'
+      const response = await app
+        .get(`${endpointUrl}?name=${subjectName}`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+
+      response.body.data.forEach((subject) => {
+        expect(subject.name.toLowerCase()).toContain(subjectName.toLowerCase())
+      })
     })
 
     it('should return 422 for invalid category', async () => {

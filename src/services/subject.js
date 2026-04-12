@@ -22,10 +22,16 @@ const subjectService = {
       }
 
       // Filter by name
-      if (name) {
-        const sanitizedName = mongosanitize(name)
-        filter.name = getRegex(sanitizedName)
+      if (name !== undefined) {
+        validateFunc.type('name', 'string', name)
+
+        // Sanitize the name before using it in the regex
+        const sanitizedName = String(mongosanitize(name)).trim()
+        if (sanitizedName) {
+          filter.name = getRegex(sanitizedName)
+        }
       }
+
       return await Subject.find(filter).populate('category', 'name')
     } catch (err) {
       throw handleServiceError(err, 'Failed to retrieve subjects')
