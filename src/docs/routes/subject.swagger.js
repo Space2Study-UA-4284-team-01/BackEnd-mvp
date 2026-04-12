@@ -13,7 +13,6 @@
  *         required: true
  *         schema:
  *           type: string
- *           pattern: "^[0-9a-fA-F]{24}$"
  *         description: MongoDB ObjectId of the subject
  *     responses:
  *       200:
@@ -64,7 +63,7 @@
  *                   example: 422
  *                 message:
  *                   type: string
- *                   example: Invalid ID format
+ *                   example: id should be of proper type ObjectId
  *       500:
  *         description: Internal server error
  *
@@ -91,7 +90,6 @@
  *               category:
  *                 type: string
  *                 description: MongoDB ObjectId of the category the subject belongs to
- *                 pattern: "^[0-9a-fA-F]{24}$"
  *           example:
  *             name: Mathematics
  *             category: 5e8f8f8f8f8f8f8f8f8f8f8f
