@@ -51,6 +51,16 @@ const categoryService = {
       .lean()
     
     return categories.map(({ name }) => name)
+  },
+
+  getCategoryById: async (id) => {
+    const category = await Category.findById(id).lean()
+
+    if (!category) {
+      throw createError(404, 'CATEGORY_NOT_FOUND')
+    }
+
+    return category
   }
 }
 

@@ -142,7 +142,7 @@
  *               properties:
  *                 _id:
  *                   type: string
- *                   example: "65f1c9a2f1a2b3c4d5e6f7g8"
+ *                   example: "65f1c9a2f1a2b3c4d5e6f7a8"
  *                 name:
  *                   type: string
  *                   example: "Mathematics"
@@ -232,4 +232,64 @@
  *                   example: ["Mathematics", "Physics", "Chemistry"]
  *       401:
  *         description: Unauthorized - Access token is missing or invalid
+ */
+/**
+ * @swagger
+ * /categories/{id}:
+ *   get:
+ *     summary: Get category by ID
+ *     description: Returns detailed information about a category.
+ *     tags:
+ *       - Category
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "65f1c9a2f1a2b3c4d5e6f7a8"
+ *     responses:
+ *       200:
+ *         description: Category retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                   example: "65f1c9a2f1a2b3c4d5e6f7a8"
+ *                 name:
+ *                   type: string
+ *                   example: "Mathematics"
+ *                 appearance:
+ *                   type: object
+ *                   properties:
+ *                     icon:
+ *                       type: string
+ *                       example: "math-icon.png"
+ *                     color:
+ *                       type: string
+ *                       example: "#FF0000"
+ *                 totalOffers:
+ *                   type: object
+ *                   properties:
+ *                     student:
+ *                       type: number
+ *                       example: 0
+ *                     tutor:
+ *                       type: number
+ *                       example: 0
+ *                 createdAt:
+ *                   type: string
+ *                   example: "2026-03-29T18:00:02.305Z"
+ *                 updatedAt:
+ *                   type: string
+ *                   example: "2026-03-29T18:00:02.305Z"
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Category not found
  */
