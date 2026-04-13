@@ -326,4 +326,31 @@ describe('Category controller', () => {
     })
   })
 
+  describe('GET /categories/:id', () => {
+    let categoryId
+
+    beforeEach(async () => {
+      const category = await Category.create(testCategoryData)
+      categoryId = category._id.toString()
+    })
+
+    it('should return 200 and category details for valid ID', async () => {
+      const response = await app
+        .get(`${endpointUrl}${categoryId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(response._body._id).toBe(categoryId)
+    })
+
+    it('should return 404 for non-existent ID', async () => {
+      const fakeId = '60f72360f044231f8e2b2605' // valid ObjectId format but does not exist in DB
+      const response = await app
+        .get(`${endpointUrl}${fakeId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      expect(response.statusCode).toBe(404)
+    })
+  })
+
 })

@@ -9,7 +9,8 @@ const { ADMIN, SUPERADMIN } = require('~/consts/auth').roles
 router.use(authMiddleware)
 
 router.get('/', asyncWrapper(categoryController.getCategories))
-router.get('/names', asyncWrapper(categoryController.getCategoriesNames));
+router.get('/names', asyncWrapper(categoryController.getCategoriesNames))
+router.get('/:id', asyncWrapper(categoryController.getCategoryById))
 
 router.use(restrictTo(ADMIN, SUPERADMIN))
 router.post('/', asyncWrapper(categoryController.createCategory))
