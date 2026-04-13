@@ -125,7 +125,7 @@ describe('Category controller', () => {
       await app
         .post(endpointUrl)
         .send(testCategoryData)
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       await app
         .post(endpointUrl)
@@ -136,7 +136,7 @@ describe('Category controller', () => {
             color: '#00FF00'
           }
         })
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       await app
         .post(endpointUrl)
@@ -147,7 +147,7 @@ describe('Category controller', () => {
             color: '#0000FF'
           }
         })
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       // Create subjects for categories to make them visible in GET request
       const Category = require('~/models/category')
@@ -176,7 +176,7 @@ describe('Category controller', () => {
     it('should return categories successfully for authenticated user', async () => {
       const response = await app
         .get(endpointUrl)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response._body).toHaveProperty('items')
@@ -188,7 +188,7 @@ describe('Category controller', () => {
     it('should return categories with correct structure', async () => {
       const response = await app
         .get(endpointUrl)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response._body.items.length).toBeGreaterThan(0)
@@ -209,7 +209,7 @@ describe('Category controller', () => {
     it('should filter categories by name', async () => {
       const response = await app
         .get(`${endpointUrl}?name=test`)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response._body.items.length).toBeGreaterThan(0)
@@ -221,7 +221,7 @@ describe('Category controller', () => {
     it('should support pagination with limit parameter', async () => {
       const response = await app
         .get(`${endpointUrl}?limit=2`)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response._body.items.length).toBeLessThanOrEqual(2)
@@ -230,12 +230,11 @@ describe('Category controller', () => {
     it('should support pagination with skip parameter', async () => {
       const firstResponse = await app
         .get(`${endpointUrl}?limit=1&skip=0`)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       const secondResponse = await app
         .get(`${endpointUrl}?limit=1&skip=1`)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
-
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
       expect(firstResponse.statusCode).toBe(200)
       expect(secondResponse.statusCode).toBe(200)
       expect(firstResponse._body.items.length).toBe(1)
@@ -254,7 +253,7 @@ describe('Category controller', () => {
     it('should handle invalid limit parameter gracefully', async () => {
       const response = await app
         .get(`${endpointUrl}?limit=invalid`)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(422)
     })
@@ -262,7 +261,7 @@ describe('Category controller', () => {
     it('should handle invalid skip parameter gracefully', async () => {
       const response = await app
         .get(`${endpointUrl}?skip=invalid`)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(422)
     })
@@ -270,7 +269,7 @@ describe('Category controller', () => {
     it('should return empty result for non-matching name filter', async () => {
       const response = await app
         .get(`${endpointUrl}?name=nonexistentcategory`)
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response._body.items).toEqual([])
