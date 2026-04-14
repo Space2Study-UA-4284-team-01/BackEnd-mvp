@@ -11,7 +11,7 @@ const setupControllerTests = require('~/test/helpers/controllerSetup')
 const endpointUrl = '/categories/'
 
 const testCategoryData = {
-  name: 'Mathematics',
+  name: 'Test Category',
   appearance: {
     icon: 'math-icon.png',
     color: '#FF0000'
@@ -117,6 +117,163 @@ describe('Category controller', () => {
       expect(response._body.name).toBe('Brand New Category')
       expect(response._body.appearance).toHaveProperty('icon')
       expect(response._body.appearance).toHaveProperty('color')
+    })
+  })
+
+  describe('GET /categories/', () => {
+    beforeEach(async () => {
+      await app
+        .post(endpointUrl)
+        .send(testCategoryData)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      await app
+        .post(endpointUrl)
+        .send({
+          name: 'Physics',
+          appearance: {
+            icon: 'physics-icon.png',
+            color: '#00FF00'
+          }
+        })
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      await app
+        .post(endpointUrl)
+        .send({
+          name: 'Chemistry',
+          appearance: {
+            icon: 'chemistry-icon.png',
+            color: '#0000FF'
+          }
+        })
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      // Create subjects for categories to make them visible in GET request
+      const Category = require('~/models/category')
+
+      const mathCategory = await Category.findOne({ name: 'Test Category' })
+      const physicsCategory = await Category.findOne({ name: 'Physics' })
+
+      if (mathCategory) {
+        // Insert subject directly into database collection
+        await Category.db.collection('subjects').insertOne({
+          name: 'Algebra',
+          category: mathCategory._id,
+          description: 'Basic algebra course'
+        })
+      }
+
+      if (physicsCategory) {
+        await Category.db.collection('subjects').insertOne({
+          name: 'Mechanics',
+          category: physicsCategory._id,
+          description: 'Classical mechanics'
+        })
+      }
+    })
+
+    it('should return categories successfully for authenticated user', async () => {
+      const response = await app
+        .get(endpointUrl)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(response._body).toHaveProperty('items')
+      expect(response._body).toHaveProperty('count')
+      expect(Array.isArray(response._body.items)).toBe(true)
+      expect(typeof response._body.count).toBe('number')
+    })
+
+    it('should return categories with correct structure', async () => {
+      const response = await app
+        .get(endpointUrl)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(response._body.items.length).toBeGreaterThan(0)
+
+      const firstCategory = response._body.items[0]
+      expect(firstCategory).toHaveProperty('_id')
+      expect(firstCategory).toHaveProperty('name')
+      expect(firstCategory).toHaveProperty('appearance')
+      expect(firstCategory.appearance).toHaveProperty('icon')
+      expect(firstCategory.appearance).toHaveProperty('color')
+      expect(firstCategory).toHaveProperty('totalOffers')
+      expect(firstCategory.totalOffers).toHaveProperty('student')
+      expect(firstCategory.totalOffers).toHaveProperty('tutor')
+      expect(firstCategory).toHaveProperty('createdAt')
+      expect(firstCategory).toHaveProperty('updatedAt')
+    })
+
+    it('should filter categories by name', async () => {
+      const response = await app
+        .get(`${endpointUrl}?name=test`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(response._body.items.length).toBeGreaterThan(0)
+      response._body.items.forEach(category => {
+        expect(category.name.toLowerCase()).toContain('test')
+      })
+    })
+
+    it('should support pagination with limit parameter', async () => {
+      const response = await app
+        .get(`${endpointUrl}?limit=2`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(response._body.items.length).toBeLessThanOrEqual(2)
+    })
+
+    it('should support pagination with skip parameter', async () => {
+      const firstResponse = await app
+        .get(`${endpointUrl}?limit=1&skip=0`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      const secondResponse = await app
+        .get(`${endpointUrl}?limit=1&skip=1`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+      expect(firstResponse.statusCode).toBe(200)
+      expect(secondResponse.statusCode).toBe(200)
+      expect(firstResponse._body.items.length).toBe(1)
+      expect(secondResponse._body.items.length).toBe(1)
+
+      // Items should be different
+      expect(firstResponse._body.items[0]._id).not.toBe(secondResponse._body.items[0]._id)
+    })
+
+    it('should return 401 for unauthenticated request', async () => {
+      const response = await app.get(endpointUrl)
+
+      expectError(401, UNAUTHORIZED, response)
+    })
+
+    it('should handle invalid limit parameter gracefully', async () => {
+      const response = await app
+        .get(`${endpointUrl}?limit=invalid`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(422)
+    })
+
+    it('should handle invalid skip parameter gracefully', async () => {
+      const response = await app
+        .get(`${endpointUrl}?skip=invalid`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(422)
+    })
+
+    it('should return empty result for non-matching name filter', async () => {
+      const response = await app
+        .get(`${endpointUrl}?name=nonexistentcategory`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(response._body.items).toEqual([])
+      expect(response._body.count).toBe(0)
     })
   })
 })

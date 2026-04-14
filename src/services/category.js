@@ -1,4 +1,5 @@
 const Category = require('~/models/category')
+const categoriesAggregateOptions = require('~/utils/categories/categoriesAggregateOptions')
 const { validateFunc } = require('~/utils/validationHelper')
 const { createError } = require('~/utils/errorsHelper')
 const { FIELD_ALREADY_EXISTS } = require('~/consts/errors')
@@ -20,6 +21,27 @@ const categoryService = {
       name,
       appearance
     })
+  },
+
+  getCategories: async (query = {}) => {
+    if (query.limit !== undefined) {
+      validateFunc.number('limit', query.limit)
+      if (query.limit < 0 || !Number.isInteger(Number(query.limit))) {
+       throw createError(400, 'LIMIT_MUST_BE_NON_NEGATIVE_INTEGER')
+    }
+    }
+
+    if (query.skip !== undefined) {
+      validateFunc.number('skip', query.skip)
+      if (query.skip < 0 || !Number.isInteger(Number(query.skip))) {
+        throw createError(400, 'SKIP_MUST_BE_NON_NEGATIVE_INTEGER')
+      }
+    }
+
+    const pipeline = categoriesAggregateOptions(query)
+    const [result] = await Category.aggregate(pipeline)
+
+    return result 
   }
 }
 

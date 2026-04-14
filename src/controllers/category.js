@@ -8,6 +8,15 @@ const createCategory = async (req, res) => {
   res.status(201).json(newCategory)
 }
 
+const getCategories = async (req, res) => {
+  //pass all query parameters to service for filtering, sorting and pagination
+  const categories = await categoryService.getCategories(req.query)
+
+  res.status(200).json(categories)
+}
+
+
 module.exports = {
-  createCategory
+  createCategory,
+  getCategories
 }

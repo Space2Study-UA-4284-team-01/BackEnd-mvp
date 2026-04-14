@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
@@ -12,6 +13,7 @@ const { createNotFoundError } = require('~/utils/errorsHelper')
 const errorMiddleware = require('~/middlewares/error')
 
 const initialization = (app) => {
+  app.use(express.static(path.join(__dirname, '../../public'))) // serve static files from the "public" directory
   app.use(express.json({ limit: '10mb' }))
   app.use(express.urlencoded({ extended: true }))
   app.use(cookieParser())

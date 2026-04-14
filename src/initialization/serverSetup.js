@@ -1,5 +1,6 @@
 const databaseInitialization = require('~/initialization/database')
 const checkUserExistence = require('~/seed/checkUserExistence')
+const checkCategoriesExistence = require('~/seed/checkCategoriesExistence')
 const initialization = require('~/initialization/initialization')
 const logger = require('~/logger/logger')
 const {
@@ -12,6 +13,7 @@ const serverSetup = async (app) => {
   await databaseInitialization()
   await checkUserExistence()
   await checkSubjectsExistence()
+  await checkCategoriesExistence()
   initialization(app)
   return app.listen(SERVER_PORT, () => {
     logger.info(`Server is running on port ${SERVER_PORT}`)
