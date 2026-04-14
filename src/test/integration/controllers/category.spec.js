@@ -279,12 +279,12 @@ describe('Category controller', () => {
       await app
         .post(endpointUrl)
         .send(testCategoryData)
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       // 2. get names
       const response = await app
         .get('/categories/names')
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response.body.data).toEqual(
@@ -295,7 +295,7 @@ describe('Category controller', () => {
     it('should return empty array when no categories exist', async () => {
       const response = await app
         .get('/categories/names')
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response.body.data).toEqual([])
@@ -311,15 +311,14 @@ describe('Category controller', () => {
     it('should allow all authenticated roles to access names', async () => {
       const adminRes = await app
         .get('/categories/names')
-        .set('Cookie', [`accessToken=${adminAccessToken}`])
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       const studentRes = await app
         .get('/categories/names')
-        .set('Cookie', [`accessToken=${studentAccessToken}`])
-
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
       const tutorRes = await app
         .get('/categories/names')
-        .set('Cookie', [`accessToken=${tutorAccessToken}`])
+        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
 
       expect(adminRes.statusCode).toBe(200)
       expect(studentRes.statusCode).toBe(200)
