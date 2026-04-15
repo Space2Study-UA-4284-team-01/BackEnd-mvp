@@ -6,6 +6,7 @@ const { ADMIN, SUPERADMIN } = require('~/consts/auth').roles
 
 router.use(authMiddleware)
 
+router.get('/', asyncWrapper(subjectController.getSubjects))
 router.get('/:id', asyncWrapper(subjectController.getSubjectById))
 
 router.use(restrictTo(ADMIN, SUPERADMIN))

@@ -2,6 +2,11 @@ const subjectService = require('~/services/subject')
 const errors = require('~/consts/errors')
 const { createError } = require('~/utils/errorsHelper')
 
+const getSubjects = async (req, res) => {
+  const subjects = await subjectService.getSubjects(req.query)
+  res.status(200).json({ data: subjects })
+}
+
 const getSubjectById = async (req, res) => {
   const { id } = req.params
   const subject = await subjectService.getSubjectById(id)
@@ -19,6 +24,7 @@ const createSubject = async (req, res) => {
 }
 
 module.exports = {
-  createSubject,
-  getSubjectById
+  getSubjects,
+  getSubjectById,
+  createSubject
 }

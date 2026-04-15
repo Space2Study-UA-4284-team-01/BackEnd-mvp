@@ -3,11 +3,42 @@ const Category = require('~/models/category')
 const errors = require('~/consts/errors')
 const { createError } = require('~/utils/errorsHelper')
 const { validateFunc } = require('~/utils/validationHelper')
+const getRegex = require('~/utils/getRegex')
 const mongosanitize = require('mongo-sanitize')
 const { validateObjectId } = require('~/utils/helper/validateObjectId')
 const handleServiceError = require('~/utils/helper/handleServiceError')
 
 const subjectService = {
+  getSubjects: async (query) => {
+    try {
+      const { category, name } = query
+      const filter = {}
+
+      // Validate and build filter for category
+      if (category) {
+        validateObjectId(category, 'category')
+
+        filter.category = category
+      }
+
+      // Filter by name
+      if (name !== undefined) {
+        validateFunc.type('name', 'string', name)
+
+        // Sanitize the name before using it in the regex
+        const sanitizedName = String(mongosanitize(name)).trim()
+        if (sanitizedName) {
+          filter.name = getRegex(sanitizedName)
+        }
+      }
+
+      return await Subject.find(filter).populate('category', 'name')
+    } catch (err) {
+      throw handleServiceError(err, 'Failed to retrieve subjects')
+
+    }
+  },
+  
   getSubjectById: async (id) => {
     try {
       validateObjectId(id, 'id')
@@ -20,7 +51,7 @@ const subjectService = {
       handleServiceError(err, 'Failed to get subject by id')
     }
   },
-
+    
   createSubject: async (data) => {
     try {
       const { name, category } = data
