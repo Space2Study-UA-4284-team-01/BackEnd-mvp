@@ -121,7 +121,6 @@ const subjectsData = {
     'Electrical Engineering',
     'Civil Engineering',
     'Chemical Engineering',
-    'Software Engineering',
     'Robotics',
     'Control Systems',
     'Structural Analysis',
