@@ -3,7 +3,7 @@
  * /categories:
  *   get:
  *     summary: Get categories
- *     description: Retrieve a list of categories with optional filtering and pagination. 
+ *     description: Retrieve a list of categories with optional filtering and pagination.
  *     tags:
  *       - Category
  *     security:

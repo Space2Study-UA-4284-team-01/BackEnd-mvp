@@ -12,8 +12,8 @@ const checkCategoriesExistence = async () => {
       logger.info('Categories already exist, skipping seed.')
     }
   } catch (err) {
-      logger.error('Error checking categories existence:', err)
-      // Optionally, you could choose to seed categories if there's an error checking existence
+    logger.error('Error checking categories existence:', err)
+    // Optionally, you could choose to seed categories if there's an error checking existence
   }
 }
 

@@ -174,9 +174,7 @@ describe('Category controller', () => {
     })
 
     it('should return categories successfully for authenticated user', async () => {
-      const response = await app
-        .get(endpointUrl)
-        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+      const response = await app.get(endpointUrl).set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response._body).toHaveProperty('items')
@@ -186,9 +184,7 @@ describe('Category controller', () => {
     })
 
     it('should return categories with correct structure', async () => {
-      const response = await app
-        .get(endpointUrl)
-        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+      const response = await app.get(endpointUrl).set('Cookie', [`accessToken=${token.studentAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response._body.items.length).toBeGreaterThan(0)
@@ -213,7 +209,7 @@ describe('Category controller', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response._body.items.length).toBeGreaterThan(0)
-      response._body.items.forEach(category => {
+      response._body.items.forEach((category) => {
         expect(category.name.toLowerCase()).toContain('test')
       })
     })

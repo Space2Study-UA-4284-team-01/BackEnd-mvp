@@ -7,11 +7,13 @@ const {
   config: { SERVER_PORT }
 } = require('~/configs/config')
 const scheduledCronJobs = require('~/cron-jobs/scheduledCronJobs')
+const checkSubjectsExistence = require('~/seed/checkSubjectExistence')
 
 const serverSetup = async (app) => {
   await databaseInitialization()
   await checkUserExistence()
   await checkCategoriesExistence()
+  await checkSubjectsExistence()
   initialization(app)
   return app.listen(SERVER_PORT, () => {
     logger.info(`Server is running on port ${SERVER_PORT}`)

@@ -27,8 +27,8 @@ const categoryService = {
     if (query.limit !== undefined) {
       validateFunc.number('limit', query.limit)
       if (query.limit < 0 || !Number.isInteger(Number(query.limit))) {
-       throw createError(400, 'LIMIT_MUST_BE_NON_NEGATIVE_INTEGER')
-    }
+        throw createError(400, 'LIMIT_MUST_BE_NON_NEGATIVE_INTEGER')
+      }
     }
 
     if (query.skip !== undefined) {
@@ -41,7 +41,7 @@ const categoryService = {
     const pipeline = categoriesAggregateOptions(query)
     const [result] = await Category.aggregate(pipeline)
 
-    return result 
+    return result
   }
 }
 

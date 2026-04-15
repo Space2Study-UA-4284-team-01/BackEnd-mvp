@@ -38,6 +38,60 @@ describe('Subject controller', () => {
     })
   })
 
+  describe('GET /subjects', () => {
+    it('should return subjects for authorized user', async () => {
+      const response = await app.get(endpointUrl).set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+      expect(Array.isArray(response.body.data)).toBe(true)
+    })
+
+    it('should filter by category', async () => {
+      const response = await app
+        .get(`${endpointUrl}?category=${validCategoryId}`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+
+      response.body.data.forEach((subject) => {
+        expect(subject.category).toBeDefined()
+
+        if (typeof subject.category === 'object') {
+          expect(subject.category._id.toString()).toBe(validCategoryId)
+        } else {
+          expect(subject.category).toBe(validCategoryId)
+        }
+      })
+    })
+
+    it('should filter by name', async () => {
+      const subjectName = 'Math'
+      const response = await app
+        .get(`${endpointUrl}?name=${subjectName}`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(200)
+
+      response.body.data.forEach((subject) => {
+        expect(subject.name.toLowerCase()).toContain(subjectName.toLowerCase())
+      })
+    })
+
+    it('should return 422 for invalid category', async () => {
+      const response = await app
+        .get(`${endpointUrl}?category=invalid`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expect(response.statusCode).toBe(422)
+    })
+
+    it('should return 401 if not authenticated', async () => {
+      const response = await app.get(endpointUrl)
+
+      expect(response.statusCode).toBe(401)
+    })
+  })
+
   describe('POST /subjects/', () => {
     it('should create a new subject successfully for admin user', async () => {
       const response = await app

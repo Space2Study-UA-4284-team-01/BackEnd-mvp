@@ -49,7 +49,7 @@ const seedCategories = {
     try {
       let addedCount = 0
       for (const categoryData of categoriesData) {
-          const existingCategory = await Category.findOne({ name: String(categoryData.name) })
+        const existingCategory = await Category.findOne({ name: String(categoryData.name) })
         if (!existingCategory) {
           await Category.create(categoryData)
           addedCount++
@@ -61,8 +61,8 @@ const seedCategories = {
         logger.info('All categories already exist, no new categories added.')
       }
     } catch (err) {
-        logger.error('Error seeding categories:', err)
-        // server should continue running even if seeding fails, so we don't rethrow the error
+      logger.error('Error seeding categories:', err)
+      // server should continue running even if seeding fails, so we don't rethrow the error
     }
   }
 }
