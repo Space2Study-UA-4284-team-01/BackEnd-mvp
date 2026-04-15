@@ -21,12 +21,12 @@ const categoriesAggregateOptions = (query) => {
     {
       $sort: { totalOffers: -1, updatedAt: -1 }
     },
-    {
-      $skip: parseInt(skip)
-    },
-    {
-      $limit: parseInt(limit)
-    },
+    // {
+    //   $skip: parseInt(skip)
+    // },
+    // {
+    //   $limit: parseInt(limit)
+    // },
     {
       $project: {
         subjects: 0
@@ -34,7 +34,7 @@ const categoriesAggregateOptions = (query) => {
     },
     {
       $facet: {
-        items: [{ $skip: Number(skip) }, { $limit: Number(limit) }],
+        items: [{ $skip: Number.parseInt(skip) }, { $limit: Number.parseInt(limit) }],
         count: [{ $count: 'count' }]
       }
     },

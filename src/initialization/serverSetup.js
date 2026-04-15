@@ -1,5 +1,6 @@
 const databaseInitialization = require('~/initialization/database')
 const checkUserExistence = require('~/seed/checkUserExistence')
+const checkCategoriesExistence = require('~/seed/checkCategoriesExistence')
 const initialization = require('~/initialization/initialization')
 const logger = require('~/logger/logger')
 const {
@@ -11,6 +12,7 @@ const checkSubjectsExistence = require('~/seed/checkSubjectExistence')
 const serverSetup = async (app) => {
   await databaseInitialization()
   await checkUserExistence()
+  await checkCategoriesExistence()
   await checkSubjectsExistence()
   initialization(app)
   return app.listen(SERVER_PORT, () => {
