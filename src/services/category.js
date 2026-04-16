@@ -3,6 +3,7 @@ const categoriesAggregateOptions = require('~/utils/categories/categoriesAggrega
 const { validateFunc } = require('~/utils/validationHelper')
 const { createError } = require('~/utils/errorsHelper')
 const { FIELD_ALREADY_EXISTS } = require('~/consts/errors')
+const { validateObjectId } = require('~/utils/helper/validateObjectId')
 
 const categoryService = {
   createCategory: async (data) => {
@@ -54,6 +55,7 @@ const categoryService = {
   },
 
   getCategoryById: async (id) => {
+    validateObjectId(id)
     const category = await Category.findById(id).lean()
 
     if (!category) {
