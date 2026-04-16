@@ -329,6 +329,8 @@ describe('Category controller', () => {
   describe('GET /categories/:id', () => {
     let categoryId
 
+    const Category = require('~/models/category')
+
     beforeEach(async () => {
       const category = await Category.create(testCategoryData)
       categoryId = category._id.toString()
