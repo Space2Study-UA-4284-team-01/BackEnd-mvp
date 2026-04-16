@@ -221,4 +221,74 @@ describe('Subject controller', () => {
       expectError(422, FIELD_IS_NOT_OF_PROPER_LENGTH('name', { min: 1, max: 30 }), response)
     })
   })
+
+  describe('DELETE /subjects/:id', () => {
+    let subjectToDeleteId
+
+    beforeEach(async () => {
+      // Create a subject to test deletion
+      const created = await app
+        .post(endpointUrl)
+        .send({
+          name: 'Subject to Delete',
+          category: validCategoryId
+        })
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      subjectToDeleteId = created.body.data._id
+    })
+
+    it('should delete subject successfully for admin user', async () => {
+      const response = await app
+        .delete(`${endpointUrl}${subjectToDeleteId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      expect(response.statusCode).toBe(204)
+
+      // Verify that the subject is actually deleted
+      const getResponse = await app
+        .get(`${endpointUrl}${subjectToDeleteId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      expectError(404, SUBJECT_NOT_FOUND, getResponse)
+    })
+
+    it('should return 403 for student user', async () => {
+      const response = await app
+        .delete(`${endpointUrl}${subjectToDeleteId}`)
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+
+      expectError(403, FORBIDDEN, response)
+    })
+
+    it('should return 403 for tutor user', async () => {
+      const response = await app
+        .delete(`${endpointUrl}${subjectToDeleteId}`)
+        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
+
+      expectError(403, FORBIDDEN, response)
+    })
+
+    it('should return 401 for unauthenticated user', async () => {
+      const response = await app.delete(`${endpointUrl}${subjectToDeleteId}`)
+
+      expectError(401, UNAUTHORIZED, response)
+    })
+
+    it('should return 422 for invalid id format', async () => {
+      const invalidId = '12345'
+      const response = await app
+        .delete(`${endpointUrl}${invalidId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      expectError(422, FIELD_IS_NOT_OF_PROPER_TYPE('id', 'ObjectId'), response)
+    })
+
+    it('should return 404 for non-existing subject', async () => {
+      const nonExistingId = new mongoose.Types.ObjectId().toString()
+      const response = await app
+        .delete(`${endpointUrl}${nonExistingId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      expectError(404, SUBJECT_NOT_FOUND, response)
+    })
+  })
 })

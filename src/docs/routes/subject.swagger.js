@@ -1,72 +1,5 @@
 /**
  * @swagger
- * /subjects/{id}:
- *   get:
- *     summary: Get subject by ID
- *     description: Retrieves a subject by its ID. Available for all authenticated users.
- *     tags: [Subjects]
- *     security:
- *       - cookieAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: MongoDB ObjectId of the subject
- *     responses:
- *       200:
- *         description: Subject retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                     name:
- *                       type: string
- *                     category:
- *                       type: object
- *                       properties:
- *                         _id:
- *                           type: string
- *                           description: Category ID
- *                         name:
- *                           type: string
- *                           description: Category name
- *                     totalOffers:
- *                       type: object
- *                       properties:
- *                         student:
- *                           type: integer
- *                           example: 0
- *                         tutor:
- *                           type: integer
- *                           example: 0
- *       401:
- *         description: Unauthorized - user is not authenticated
- *       404:
- *         description: Subject with the specified ID was not found
- *       422:
- *         description: Validation error - invalid ID format
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 422
- *                 message:
- *                   type: string
- *                   example: id should be of proper type ObjectId
- *       500:
- *         description: Internal server error
- *
  * /subjects:
  *   get:
  *     summary: Get a list of subjects
@@ -202,6 +135,111 @@
  *                 message:
  *                   type: string
  *                   example: Subject with this name already exists
+ *       500:
+ *         description: Internal server error
+ *
+ * /subjects/{id}:
+ *   get:
+ *     summary: Get subject by ID
+ *     description: Retrieves a subject by its ID. Available for all authenticated users.
+ *     tags: [Subjects]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: MongoDB ObjectId of the subject
+ *     responses:
+ *       200:
+ *         description: Subject retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     category:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           description: Category ID
+ *                         name:
+ *                           type: string
+ *                           description: Category name
+ *                     totalOffers:
+ *                       type: object
+ *                       properties:
+ *                         student:
+ *                           type: integer
+ *                           example: 0
+ *                         tutor:
+ *                           type: integer
+ *                           example: 0
+ *       401:
+ *         description: Unauthorized - user is not authenticated
+ *       404:
+ *         description: Subject with the specified ID was not found
+ *       422:
+ *         description: Validation error - invalid ID format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 422
+ *                 message:
+ *                   type: string
+ *                   example: id should be of proper type ObjectId
+ *       500:
+ *         description: Internal server error
+ *
+ *   delete:
+ *     summary: Delete a subject by ID
+ *     description: Deletes a subject by its ID. Available only for admin and super admin users.
+ *     tags: [Subjects]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: MongoDB ObjectId of the subject
+ *     responses:
+ *       204:
+ *         description: Subject deleted successfully
+ *       401:
+ *         description: Unauthorized - user is not authenticated
+ *       403:
+ *         description: Forbidden - user does not have permission
+ *       404:
+ *         description: Subject with the specified ID was not found
+ *       422:
+ *         description: Validation error - invalid ID format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 422
+ *                 message:
+ *                   type: string
+ *                   example: id should be of proper type ObjectId
  *       500:
  *         description: Internal server error
  */
