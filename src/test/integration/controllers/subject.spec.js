@@ -242,6 +242,11 @@ describe('Subject controller', () => {
         .send(updatedData)
         .set('Cookie', [`accessToken=${token.adminAccessToken}`])
       expect(response.statusCode).toBe(200)
+      expect(response.body.data).toMatchObject({
+        _id: subjectToUpdateId,
+        name: updatedData.name,
+        category: testSubjectData.category
+      })
     })
 
     it('should return 404 when trying to update non-existing subject', async () => {

@@ -87,7 +87,7 @@ const subjectService = {
     try {
       validateObjectId(id, 'id')
 
-      const subject = await Subject.findById(id).populate('category', 'name')
+      const subject = await Subject.findById(id)
       if (!subject) {
         throw createError(404, errors.SUBJECT_NOT_FOUND)
       }
@@ -104,7 +104,7 @@ const subjectService = {
 
         // Check for duplicate name only if the name is being updated
         const existingSubject = await Subject.findOne({ name: normalizedName, _id: { $ne: id } })
-        if (existingSubject && existingSubject._id.toString() !== id) {
+        if (existingSubject) {
           throw createError(409, errors.SUBJECT_ALREADY_EXISTS)
         }
         updateData.name = normalizedName

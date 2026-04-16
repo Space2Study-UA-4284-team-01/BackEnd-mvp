@@ -129,6 +129,7 @@
  *         application/json:
  *           schema:
  *             type: object
+ *             minProperties: 1
  *             properties:
  *               name:
  *                 type: string
