@@ -12,5 +12,6 @@ router.get('/:id', asyncWrapper(subjectController.getSubjectById))
 router.use(restrictTo(ADMIN, SUPERADMIN))
 
 router.post('/', asyncWrapper(subjectController.createSubject))
+router.patch('/:id', asyncWrapper(subjectController.updateSubject))
 
 module.exports = router
