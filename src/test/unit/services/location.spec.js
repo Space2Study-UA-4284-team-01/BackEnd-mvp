@@ -1,3 +1,6 @@
+
+process.env.NODE_ENV = 'production'
+
 const locationService = require('~/services/location')
 
 describe('Location Service Unit Tests', () => {
