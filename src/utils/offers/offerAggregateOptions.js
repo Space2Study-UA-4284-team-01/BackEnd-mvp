@@ -12,6 +12,8 @@ const offerAggregateOptions = (query, params) => {
     languages,
     nativeLanguage,
     excludedOfferId,
+    category,
+    subject,
     sort = 'createdAt',
     status,
     skip = 0,
@@ -20,6 +22,14 @@ const offerAggregateOptions = (query, params) => {
   const { id: authorId } = params
 
   const match = {}
+
+  if (category) {
+    match.category = new mongoose.Types.ObjectId(category)
+  }
+
+  if (subject) {
+    match.subject = new mongoose.Types.ObjectId(subject)
+  }
 
   if (search) {
     const searchArray = search.trim().split(' ')
@@ -37,7 +47,7 @@ const offerAggregateOptions = (query, params) => {
   }
 
   if (authorId) {
-    match['author._id'] = mongoose.Types.ObjectId(authorId)
+    match['author._id'] = new mongoose.Types.ObjectId(authorId)
   }
 
   if (authorRole) {
@@ -45,7 +55,7 @@ const offerAggregateOptions = (query, params) => {
   }
 
   if (proficiencyLevel) {
-    match.proficiencyLevel = { $in: proficiencyLevel }
+    match.proficiencyLevel = { $in: Array.isArray(proficiencyLevel) ? proficiencyLevel : [proficiencyLevel] }
   }
 
   if (price) {
@@ -74,11 +84,10 @@ const offerAggregateOptions = (query, params) => {
   }
 
   if (excludedOfferId) {
-    match._id = { $ne: mongoose.Types.ObjectId(excludedOfferId) }
+    match._id = { $ne: new mongoose.Types.ObjectId(excludedOfferId) }
   }
 
   let sortOption = {}
-
   if (sort) {
     try {
       const parsedSort = JSON.parse(sort)
@@ -87,15 +96,10 @@ const offerAggregateOptions = (query, params) => {
       sortOption = { [orderBy]: sortOrder }
     } catch {
       if (typeof sort === 'string') {
-        if (sort === 'priceAsc') {
-          sortOption['price'] = 1
-        } else if (sort === 'priceDesc') {
-          sortOption['price'] = -1
-        } else if (sort === 'rating') {
-          sortOption[`author.averageRating.${authorRole}`] = -1
-        } else {
-          sortOption[sort] = -1
-        }
+        if (sort === 'priceAsc') sortOption['price'] = 1
+        else if (sort === 'priceDesc') sortOption['price'] = -1
+        else if (sort === 'rating') sortOption[`author.averageRating.${authorRole}`] = -1
+        else sortOption[sort] = -1
       }
     }
   }
@@ -123,15 +127,30 @@ const offerAggregateOptions = (query, params) => {
         as: 'author'
       }
     },
+    { $unwind: '$author' },
+
     {
-      $unwind: '$author'
+      $lookup: {
+        from: 'subjects',
+        localField: 'subject',
+        foreignField: '_id',
+        as: 'subject'
+      }
     },
+    { $unwind: '$subject' },
+
     {
-      $match: match
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: 'category'
+      }
     },
-    {
-      $sort: sortOption
-    },
+    { $unwind: '$category' },
+
+    { $match: match },
+    { $sort: sortOption },
     {
       $facet: {
         count: [{ $count: 'count' }],
