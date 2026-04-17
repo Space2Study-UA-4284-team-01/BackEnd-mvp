@@ -4,8 +4,10 @@ const idValidation = require('~/middlewares/idValidation')
 const asyncWrapper = require('~/middlewares/asyncWrapper')
 const { authMiddleware } = require('~/middlewares/auth')
 const isEntityValid = require('~/middlewares/entityValidation')
+const validationMiddleware = require('~/middlewares/validation')
 
 const offerController = require('~/controllers/offer')
+const { offerSchema } = require('~/validation/services/offer')
 const Offer = require('~/models/offer')
 
 const body = [
@@ -15,13 +17,21 @@ const body = [
 const params = [{ model: Offer, idName: 'id' }]
 
 router.use(authMiddleware)
-
 router.param('id', idValidation)
 
 router.get('/', asyncWrapper(offerController.getOffers))
-router.post('/', isEntityValid({ body }), asyncWrapper(offerController.createOffer))
+
+router.post('/', validationMiddleware(offerSchema), isEntityValid({ body }), asyncWrapper(offerController.createOffer))
+
 router.get('/:id', isEntityValid({ params }), asyncWrapper(offerController.getOfferById))
-router.patch('/:id', isEntityValid({ params }), asyncWrapper(offerController.updateOffer))
+
+router.patch(
+  '/:id',
+  validationMiddleware(offerSchema),
+  isEntityValid({ params }),
+  asyncWrapper(offerController.updateOffer)
+)
+
 router.delete('/:id', isEntityValid({ params }), asyncWrapper(offerController.deleteOffer))
 
 module.exports = router

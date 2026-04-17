@@ -1,3 +1,5 @@
+const offerSchema = require('~/validation/schemas/offer')
+
 const allowedOfferFieldsForUpdate = {
   price: true,
   proficiencyLevel: true,
@@ -7,9 +9,10 @@ const allowedOfferFieldsForUpdate = {
   subject: true,
   category: true,
   status: true,
-  FAQ: true
+  faq: true
 }
 
 module.exports = {
+  offerSchema,
   allowedOfferFieldsForUpdate
 }
