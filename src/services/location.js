@@ -4,6 +4,9 @@ const {
 const { createError } = require('~/utils/errorsHelper')
 // eslint-disable-next-line no-unused-vars
 const { EXTERNAL_SERVICE_ERROR, NOT_FOUND } = require('~/consts/errors')
+const mockData = require('~/utils/mocks/locationData')
+
+const isMockEnabled = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
 
 const headers = {
   'X-CSCAPI-KEY': CSC_API_KEY,
@@ -12,6 +15,10 @@ const headers = {
 
 const locationService = {
   getCountries: async () => {
+    if (isMockEnabled) {
+      return mockData.countries
+    }
+
     const response = await fetch(`${CSC_API_URL}/countries`, {
       method: 'GET',
       headers
@@ -33,6 +40,17 @@ const locationService = {
     if (!countryIso) {
       return []
     }
+
+    if (isMockEnabled) {
+      const states = mockData.statesByCountry[countryIso] || []
+
+      const cities = states.flatMap(state => 
+        mockData.citiesByState[state.iso2] || []
+      )
+
+      return cities.map(({ name }) => ({ name })).sort((a, b) => a.name.localeCompare(b.name)) 
+    }
+
 
     const statesResponse = await fetch(`${CSC_API_URL}/countries/${countryIso}/states`, {
       method: 'GET',
@@ -74,7 +92,7 @@ const locationService = {
     const citiesArrays = await Promise.all(citiesPromises)
     const allCities = citiesArrays.flat()
 
-    return allCities.sort((a, b) => a.name.localeCompare(b.name))
+    return allCities.sort((a, b) => a.name.localeCompare(b.name)) 
   }
 }
 
