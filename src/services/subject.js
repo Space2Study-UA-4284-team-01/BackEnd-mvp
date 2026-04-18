@@ -1,5 +1,6 @@
 const Subject = require('~/models/subject')
 const Category = require('~/models/category')
+const User = require('~/models/user')
 const errors = require('~/consts/errors')
 const { createError } = require('~/utils/errorsHelper')
 const { validateFunc } = require('~/utils/validationHelper')
@@ -92,7 +93,10 @@ const subjectService = {
         throw createError(404, errors.SUBJECT_NOT_FOUND)
       }
 
-      await Subject.deleteOne({ _id: id })
+      // Remove the subject from all users' mainSubjects arrays
+      await User.updateMany({ mainSubjects: id }, { $pull: { mainSubjects: id } })
+
+      await Subject.findByIdAndDelete(id)
 
       return
     } catch (err) {
