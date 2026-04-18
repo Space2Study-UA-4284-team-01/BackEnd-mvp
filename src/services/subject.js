@@ -94,7 +94,10 @@ const subjectService = {
       }
 
       // Remove the subject from all users' mainSubjects arrays
-      await User.updateMany({ mainSubjects: id }, { $pull: { mainSubjects: id } })
+      await User.updateMany(
+        { $or: [{ 'mainSubjects.student': id }, { 'mainSubjects.tutor': id }] },
+        { $pull: { 'mainSubjects.student': id, 'mainSubjects.tutor': id } }
+      )
 
       await Subject.findByIdAndDelete(id)
 
