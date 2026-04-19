@@ -282,43 +282,32 @@ describe('Category controller', () => {
         .set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       // 2. get names
-      const response = await app
-        .get('/categories/names')
-        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      const response = await app.get('/categories/names').set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response.body.data).toEqual(
-        expect.arrayContaining([testCategoryData.name])
+        expect.arrayContaining([expect.objectContaining({ name: testCategoryData.name })])
       )
     })
 
     it('should return empty array when no categories exist', async () => {
-      const response = await app
-        .get('/categories/names')
-        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      const response = await app.get('/categories/names').set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(response.statusCode).toBe(200)
       expect(response.body.data).toEqual([])
     })
 
     it('should return 401 for unauthenticated user', async () => {
-      const response = await app
-        .get('/categories/names')
+      const response = await app.get('/categories/names')
 
       expectError(401, UNAUTHORIZED, response)
     })
 
     it('should allow all authenticated roles to access names', async () => {
-      const adminRes = await app
-        .get('/categories/names')
-        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      const adminRes = await app.get('/categories/names').set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
-      const studentRes = await app
-        .get('/categories/names')
-        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
-      const tutorRes = await app
-        .get('/categories/names')
-        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
+      const studentRes = await app.get('/categories/names').set('Cookie', [`accessToken=${token.studentAccessToken}`])
+      const tutorRes = await app.get('/categories/names').set('Cookie', [`accessToken=${token.tutorAccessToken}`])
 
       expect(adminRes.statusCode).toBe(200)
       expect(studentRes.statusCode).toBe(200)
@@ -347,12 +336,9 @@ describe('Category controller', () => {
 
     it('should return 404 for non-existent ID', async () => {
       const fakeId = '60f72360f044231f8e2b2605' // valid ObjectId format but does not exist in DB
-      const response = await app
-        .get(`${endpointUrl}${fakeId}`)
-        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      const response = await app.get(`${endpointUrl}${fakeId}`).set('Cookie', [`accessToken=${token.adminAccessToken}`])
 
       expect(response.statusCode).toBe(404)
     })
   })
-
 })

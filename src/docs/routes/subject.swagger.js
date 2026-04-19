@@ -171,15 +171,12 @@
  *                   properties:
  *                     _id:
  *                       type: string
- *                       description: Subject ID
  *                       example: "60d5ecb74b24c72b8c8b4567"
  *                     name:
  *                       type: string
- *                       description: Subject name
  *                       example: "Algebra"
  *                     category:
  *                       type: string
- *                       description: Category ObjectId
  *                       example: "60d5ecb74b24c72b8c8b4568"
  *                     totalOffers:
  *                       type: object
@@ -196,36 +193,8 @@
  *         description: Forbidden - user does not have admin or superadmin role
  *       409:
  *         description: Subject with the specified name already exists
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 409
- *                 code:
- *                   type: string
- *                   example: SUBJECT_ALREADY_EXISTS
- *                 message:
- *                   type: string
- *                   example: "Subject with the specified name already exists."
  *       422:
  *         description: Validation error - missing or invalid fields
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 422
- *                 code:
- *                   type: string
- *                   example: FIELD_IS_NOT_DEFINED
- *                 message:
- *                   type: string
- *                   example: "name should not be null or undefined"
  *       500:
  *         description: Internal server error
  *
@@ -233,8 +202,8 @@
  *   get:
  *     summary: Get subject names by category ID
  *     description: >
- *       Returns an array of subject name strings that belong to the specified category.
- *       Available for all authenticated users (student, tutor, admin, superadmin).
+ *       Returns an array of subject objects that belong to the specified category.
+ *       Available for all authenticated users.
  *     tags: [Subjects]
  *     security:
  *       - cookieAuth: []
@@ -249,7 +218,7 @@
  *         example: "60d5ecb74b24c72b8c8b4568"
  *     responses:
  *       200:
- *         description: Subject names retrieved successfully
+ *         description: Subject list retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -257,57 +226,43 @@
  *               properties:
  *                 data:
  *                   type: array
- *                   description: List of subject names belonging to the category
+ *                   description: List of subjects belonging to the category
  *                   items:
- *                     type: string
- *                   example: ["Algebra", "Calculus", "Geometry"]
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         pattern: "^[0-9a-fA-F]{24}$"
+ *                         example: "60d5ecb74b24c72b8c8b4568"
+ *                       name:
+ *                         type: string
+ *                         example: "Algebra"
+ *                     required:
+ *                       - _id
+ *                       - name
+ *             example:
+ *               data:
+ *                 - _id: "60d5ecb74b24c72b8c8b4568"
+ *                   name: "Algebra"
+ *                 - _id: "60d5ecb74b24c72b8c8b4569"
+ *                   name: "Calculus"
  *       401:
  *         description: Unauthorized - user is not authenticated
  *       404:
- *         description: Category with the specified ID was not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 404
- *                 code:
- *                   type: string
- *                   example: CATEGORY_NOT_FOUND
- *                 message:
- *                   type: string
- *                   example: "Category with the specified ID was not found."
+ *         description: Category not found
  *       422:
- *         description: Validation error - id is not a valid ObjectId
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 422
- *                 code:
- *                   type: string
- *                   example: FIELD_IS_NOT_OF_PROPER_TYPE
- *                 message:
- *                   type: string
- *                   example: "id should be of type ObjectId"
+ *         description: Validation error - invalid ObjectId
  *
  * /categories/subjects/names:
  *   get:
  *     summary: Get all subject names
- *     description: >
- *       Returns the names of every subject in the database regardless of category.
- *       Available for all authenticated users (student, tutor, admin, superadmin).
+ *     description: Returns all subjects across all categories. Available for all authenticated users.
  *     tags: [Subjects]
  *     security:
  *       - cookieAuth: []
  *     responses:
  *       200:
- *         description: All subject names retrieved successfully
+ *         description: Subject list retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -315,10 +270,26 @@
  *               properties:
  *                 data:
  *                   type: array
- *                   description: List of all subject names across every category
+ *                   description: List of all subjects
  *                   items:
- *                     type: string
- *                   example: ["Algebra", "Quantum Physics", "Organic Chemistry"]
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         pattern: "^[0-9a-fA-F]{24}$"
+ *                         example: "60d5ecb74b24c72b8c8b4568"
+ *                       name:
+ *                         type: string
+ *                         example: "Algebra"
+ *                     required:
+ *                       - _id
+ *                       - name
+ *             example:
+ *               data:
+ *                 - _id: "60d5ecb74b24c72b8c8b4568"
+ *                   name: "Algebra"
+ *                 - _id: "60d5ecb74b24c72b8c8b4569"
+ *                   name: "Quantum Physics"
  *       401:
  *         description: Unauthorized - user is not authenticated
  */

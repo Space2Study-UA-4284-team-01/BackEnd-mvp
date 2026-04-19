@@ -212,14 +212,14 @@
  * /categories/names:
  *   get:
  *     summary: Get all category names
- *     description: Returns a list of all category names. Accessible to all authenticated users.
+ *     description: Returns a list of all categories. Accessible to all authenticated users.
  *     tags:
  *       - Category
  *     security:
  *       - cookieAuth: []
  *     responses:
  *       200:
- *         description: List of category names retrieved successfully
+ *         description: List of categories retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -228,10 +228,23 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     type: string
- *                   example: ["Mathematics", "Physics", "Chemistry"]
- *       401:
- *         description: Unauthorized - Access token is missing or invalid
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         pattern: "^[0-9a-fA-F]{24}$"
+ *                         example: "65f1c9a2f1a2b3c4d5e6f7a8"
+ *                       name:
+ *                         type: string
+ *                         example: "Mathematics"
+ *                     required:
+ *                       - _id
+ *                       - name
+ *                   example:
+ *                     - _id: "69e4a17da94bb922b72756e4"
+ *                       name: "Mathematics"
+ *                     - _id: "69e4a17da94bb922b72756e7"
+ *                       name: "Physics"
  */
 /**
  * @swagger

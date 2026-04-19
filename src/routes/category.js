@@ -11,6 +11,7 @@ router.use(authMiddleware)
 
 router.get('/', asyncWrapper(categoryController.getCategories))
 router.get('/names', asyncWrapper(categoryController.getCategoriesNames))
+router.get('/subjects/names', asyncWrapper(subjectController.getSubjectNamesByCategoryId))
 router.get('/:id', asyncWrapper(categoryController.getCategoryById))
 router.get('/:id/subjects/names', asyncWrapper(subjectController.getSubjectNamesByCategoryId))
 
