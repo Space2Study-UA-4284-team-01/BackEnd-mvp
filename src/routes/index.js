@@ -11,6 +11,7 @@ const offer = require('~/routes/offer')
 const googleAuth = require('~/routes/googleAuth')
 const subject = require('~/routes/subject')
 const location = require('~/routes/location')
+const lessons = require('~/routes/lesson')
 
 router.use('/auth', auth)
 router.use('/auth/google-auth', googleAuth)
@@ -23,5 +24,5 @@ router.use('/resources-categories', resourcesCategory)
 router.use('/categories', category)
 router.use('/offers', offer)
 router.use('/subjects', subject)
-
+router.use('/lessons', lessons)
 module.exports = router
