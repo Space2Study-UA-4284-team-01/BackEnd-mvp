@@ -35,10 +35,9 @@ const subjectService = {
       return await Subject.find(filter).populate('category', 'name')
     } catch (err) {
       throw handleServiceError(err, 'Failed to retrieve subjects')
-
     }
   },
-  
+
   getSubjectById: async (id) => {
     try {
       validateObjectId(id, 'id')
@@ -51,7 +50,28 @@ const subjectService = {
       handleServiceError(err, 'Failed to get subject by id')
     }
   },
-    
+
+  getSubjectNamesByCategoryId: async (categoryId) => {
+    const filter = {}
+
+    if (categoryId) {
+      validateObjectId(categoryId, 'id')
+
+      const categoryExists = await Category.findById(categoryId).lean().exec()
+      if (!categoryExists) {
+        throw createError(404, errors.CATEGORY_NOT_FOUND)
+      }
+
+      filter.category = categoryId
+    }
+
+    const subjects = await Subject.find(filter).select('name').lean().exec()
+    return subjects.map(({ _id, name }) => ({
+      _id,
+      name
+    }))
+  },
+
   createSubject: async (data) => {
     try {
       const { name, category } = data

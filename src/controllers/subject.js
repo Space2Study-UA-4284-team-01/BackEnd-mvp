@@ -13,6 +13,14 @@ const getSubjectById = async (req, res) => {
   res.status(200).json({ data: subject })
 }
 
+const getSubjectNamesByCategoryId = async (req, res) => {
+  const { id: categoryId } = req.params
+
+  const names = await subjectService.getSubjectNamesByCategoryId(categoryId)
+
+  res.status(200).json(names)
+}
+
 const createSubject = async (req, res) => {
   if (!req.body || Object.keys(req.body).length === 0) {
     throw createError(422, errors.BODY_IS_NOT_DEFINED)
@@ -26,5 +34,6 @@ const createSubject = async (req, res) => {
 module.exports = {
   getSubjects,
   getSubjectById,
+  getSubjectNamesByCategoryId,
   createSubject
 }
