@@ -7,18 +7,17 @@ const errors = require('~/consts/errors')
 const tokenService = require('~/services/token')
 const Token = require('~/models/token')
 const { expectError } = require('~/test/helpers')
-
+const bcrypt = require('bcrypt')
 
 jest.mock('~/services/email', () => ({
   sendEmail: jest.fn().mockResolvedValue(true)
 }))
 
-
 describe('Auth controller', () => {
   let app, server, signupResponse
 
   beforeAll(async () => {
-    ; ({ app, server } = await serverInit())
+    ;({ app, server } = await serverInit())
   })
 
   beforeEach(async () => {
@@ -121,9 +120,8 @@ describe('Auth controller', () => {
     })
   })
 
-//--
+  //--
   describe('Google Login endpoint', () => {
-
     beforeEach(() => {
       const { OAuth2Client } = require('google-auth-library')
       OAuth2Client.prototype.verifyIdToken = jest.fn().mockResolvedValue({
@@ -136,7 +134,7 @@ describe('Auth controller', () => {
     })
 
     afterEach(() => {
-      jest.restoreAllMocks() 
+      jest.restoreAllMocks()
     })
 
     const googlePayload = {
@@ -145,18 +143,18 @@ describe('Auth controller', () => {
     }
 
     it('should login or signup user via Google', async () => {
-      const response = await app
-        .post('/auth/google-auth') 
-        .send(googlePayload)
+      const response = await app.post('/auth/google-auth').send(googlePayload)
 
       expect(response.status).toBe(200)
       expect(response.body).toHaveProperty('accessToken')
-      
+
       // is refresh token cookie set
       const setCookieHeader = response.headers['set-cookie'] || []
       const refreshTokenCookie = Array.isArray(setCookieHeader)
-        ? setCookieHeader.find((cookie) => cookie.includes('refreshToken=')) 
-        : setCookieHeader.includes('refreshToken=') ? setCookieHeader : undefined 
+        ? setCookieHeader.find((cookie) => cookie.includes('refreshToken='))
+        : setCookieHeader.includes('refreshToken=')
+        ? setCookieHeader
+        : undefined
 
       expect(refreshTokenCookie).toBeDefined()
       expect(refreshTokenCookie).toContain('refreshToken=')
@@ -164,9 +162,72 @@ describe('Auth controller', () => {
 
     it('should return error if token is missing', async () => {
       const response = await app.post('/auth/google-auth').send({ role: 'student' })
-      expect(response.status).toBe(400) 
+      expect(response.status).toBe(400)
     })
   })
-  
 
+  //--
+  describe('Login endpoint', () => {
+    beforeEach(async () => {
+      const User = require('~/models/user')
+      await User.findOneAndUpdate({ email: user.email }, { isEmailConfirmed: true })
+    })
+
+    it('should login successfully with correct credentials', async () => {
+      const loginResponse = await app.post('/auth/login').send({
+        email: user.email,
+        password: user.password
+      })
+
+      expect(loginResponse.status).toBe(200)
+      expect(loginResponse.body).toHaveProperty('accessToken')
+    })
+
+    it('should throw INCORRECT_CREDENTIALS for wrong password', async () => {
+      const response = await app.post('/auth/login').send({
+        email: user.email,
+        password: 'wrong_password'
+      })
+
+      expectError(401, errors.INCORRECT_CREDENTIALS, response)
+    })
+
+    it('should migrate plain text password to hashed on successful login', async () => {
+      const User = require('~/models/user')
+
+      // create a user with plain text password directly in the DB, bypassing the model hooks
+      const plainPassword = 'plaintextpass123'
+      const testUser = {
+        role: ['student'],
+        firstName: 'Migration',
+        lastName: 'Test',
+        email: 'migration@test.com',
+        password: plainPassword, // unhashed
+        lastLoginAs: 'student',
+        appLanguage: 'en',
+        isEmailConfirmed: true,
+        isFirstLogin: true
+      }
+
+      // insert the user directly, bypassing the model (to avoid the hook)
+      await User.collection.insertOne(testUser)
+
+      // try to login
+      const loginResponse = await app.post('/auth/login').send({
+        email: testUser.email,
+        password: plainPassword
+      })
+
+      expect(loginResponse.status).toBe(200)
+      expect(loginResponse.body).toHaveProperty('accessToken')
+
+      // verify that the password is now hashed in the DB
+      const updatedUser = await User.findOne({ email: testUser.email }).select('+password')
+      expect(updatedUser.password).toMatch(/^\$2/) // starts with $2 (bcrypt hash)
+
+      // verify that the hash matches the password
+      const isValidHash = await bcrypt.compare(plainPassword, updatedUser.password)
+      expect(isValidHash).toBe(true)
+    })
+  })
 })

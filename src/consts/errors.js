@@ -52,6 +52,10 @@ const errors = {
     code: 'FORBIDDEN',
     message: 'You do not have permission to perform this action.'
   },
+  EXTERNAL_SERVICE_ERROR: {
+    code: 'EXTERNAL_SERVICE_ERROR',
+    message: 'An error occurred while communicating with an external service.'
+  },
   BAD_REQUEST: {
     code: 'BAD_REQUEST',
     message: 'The request could not be processed due to invalid or missing parameters.'
@@ -75,7 +79,7 @@ const errors = {
     code: 'BAD_RESET_TOKEN',
     message: 'The reset token is either invalid or has expired.'
   },
-  BAD_CONFIRM_TOKEN: { 
+  BAD_CONFIRM_TOKEN: {
     code: 'BAD_CONFIRM_TOKEN',
     message: 'The confirmation token is either invalid or has expired.'
   },
@@ -99,6 +103,18 @@ const errors = {
     code: 'INVALID_LANGUAGE',
     message: `The language name is invalid. Possible options: ${APP_LANG_ENUM.join(', ')}.`
   },
+  CATEGORY_NOT_FOUND: {
+    code: 'CATEGORY_NOT_FOUND',
+    message: 'Category with the specified ID was not found.'
+  },
+  SUBJECT_ALREADY_EXISTS: {
+    code: 'SUBJECT_ALREADY_EXISTS',
+    message: 'Subject with the specified name already exists.'
+  },
+  SUBJECT_NOT_FOUND: {
+    code: 'SUBJECT_NOT_FOUND',
+    message: 'Subject with the specified ID was not found.'
+  },
   DOCUMENT_NOT_FOUND: (document) => ({
     code: 'DOCUMENT_NOT_FOUND',
     message: `${document} with the specified ${document.length > 1 ? 'IDs were' : 'ID was'} not found.`
@@ -118,6 +134,10 @@ const errors = {
   VALUE_MUST_BE_BELOW: (field, val) => `${field[0].toUpperCase() + field.slice(1)} must be below ${val}.`,
   DOCUMENT_ALREADY_EXISTS: (uniqueFields) => ({
     code: 'DOCUMENT_ALREADY_EXISTS',
+    message: `'${uniqueFields}' field(s) must be unique.`
+  }),
+  FIELD_ALREADY_EXISTS: (uniqueFields) => ({
+    code: 'FIELD_ALREADY_EXISTS',
     message: `'${uniqueFields}' field(s) must be unique.`
   }),
   MONGO_SERVER_ERROR: (message) => ({

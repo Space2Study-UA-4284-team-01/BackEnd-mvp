@@ -18,6 +18,8 @@ const emailSubject = require('~/consts/emailSubject')
 const {
   tokenNames: { REFRESH_TOKEN, RESET_TOKEN, CONFIRM_TOKEN }
 } = require('~/consts/auth')
+const bcrypt = require('bcrypt')
+const { SALT_ROUNDS } = require('~/consts/auth')
 
 const bcrypt = require('bcrypt')
 
@@ -89,10 +91,13 @@ const authService = {
       throw createError(401, USER_NOT_FOUND)
     }
 
+    // compare through bcrypt if not from Google
+    //const checkedPassword = isFromGoogle || await bcrypt.compare(password, user.password)
+
     let checkedPassword = isFromGoogle
 
     if (!isFromGoogle) {
-      // Перевіряємо, чи захешований пароль у базі (формат bcrypt)
+      // check if the password in DB is hashed (bcrypt format)
       const bcryptHashRegex = /^\$2[aby]\$\d{1,2}\$[./A-Za-z0-9]{53}$/
       const isHashed = bcryptHashRegex.test(user.password)
 
@@ -182,8 +187,7 @@ const authService = {
     }
 
     const { id: userId, firstName, email } = tokenData
-
-    // Хешуємо новий пароль перед збереженням
+    // hash the new password before saving
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
     await privateUpdateUser(userId, { password: hashedPassword })
 

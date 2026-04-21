@@ -1,6 +1,7 @@
 const swaggerJsdoc = require('swagger-jsdoc')
 
 const {
+  // eslint-disable-next-line no-unused-vars
   config: { SERVER_PORT }
 } = require('~/configs/config')
 
@@ -13,7 +14,7 @@ const options = {
       description: 'API documentation for SpaceToStudy'
     }
   },
-  apis: ['./src/routes/*.js']
+  apis: ['./src/routes/*.js', './src/docs/**/*.swagger.js']
 }
 
 const swaggerSpec = swaggerJsdoc(options)
