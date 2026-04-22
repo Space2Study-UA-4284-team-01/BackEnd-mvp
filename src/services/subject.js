@@ -35,10 +35,9 @@ const subjectService = {
       return await Subject.find(filter).populate('category', 'name')
     } catch (err) {
       throw handleServiceError(err, 'Failed to retrieve subjects')
-
     }
   },
-  
+
   getSubjectById: async (id) => {
     try {
       validateObjectId(id, 'id')
@@ -51,7 +50,7 @@ const subjectService = {
       handleServiceError(err, 'Failed to get subject by id')
     }
   },
-    
+
   createSubject: async (data) => {
     try {
       const { name, category } = data
@@ -81,6 +80,53 @@ const subjectService = {
       return await Subject.create({ ...data, name: normalizedName })
     } catch (err) {
       handleServiceError(err, 'Failed to create subject')
+    }
+  },
+
+  updateSubject: async (id, data) => {
+    try {
+      validateObjectId(id, 'id')
+
+      const subject = await Subject.findById(id)
+      if (!subject) {
+        throw createError(404, errors.SUBJECT_NOT_FOUND)
+      }
+
+      const updateData = {}
+
+      // Name update and validation
+      if (data.name !== undefined) {
+        validateFunc.type('name', 'string', data.name)
+
+        const sanitizedName = mongosanitize(data.name)
+        const normalizedName = String(sanitizedName).trim()
+        validateFunc.length('name', { min: 1, max: 30 }, normalizedName)
+
+        // Check for duplicate name only if the name is being updated
+        const existingSubject = await Subject.findOne({ name: normalizedName, _id: { $ne: id } })
+        if (existingSubject) {
+          throw createError(409, errors.SUBJECT_ALREADY_EXISTS)
+        }
+        updateData.name = normalizedName
+      }
+
+      // Category update and validation
+      if (data.category !== undefined) {
+        validateObjectId(data.category, 'category')
+
+        const categoryExists = await Category.findById(data.category)
+
+        if (!categoryExists) {
+          throw createError(404, errors.CATEGORY_NOT_FOUND)
+        }
+        updateData.category = data.category
+      }
+
+      // Update the subject
+      Object.assign(subject, updateData)
+      return await subject.save()
+    } catch (err) {
+      handleServiceError(err, 'Failed to update subject')
     }
   }
 }
