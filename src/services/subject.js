@@ -129,7 +129,7 @@ const subjectService = {
     } catch (err) {
       handleServiceError(err, 'Failed to update subject')
     }
-  }
+  },
   
   deleteSubject: async (id) => {
     try {
