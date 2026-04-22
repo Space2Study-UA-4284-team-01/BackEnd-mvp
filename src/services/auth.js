@@ -14,18 +14,16 @@ const {
 } = require('~/consts/errors')
 const emailSubject = require('~/consts/emailSubject')
 
-// Імпортуємо назви токенів
+// Імпортуємо назви токенів та SALT_ROUNDS з констант
 const {
-  tokenNames: { REFRESH_TOKEN, RESET_TOKEN, CONFIRM_TOKEN }
+  tokenNames: { REFRESH_TOKEN, RESET_TOKEN, CONFIRM_TOKEN },
+  SALT_ROUNDS: AUTH_SALT_ROUNDS
 } = require('~/consts/auth')
-const bcrypt = require('bcrypt')
-const { SALT_ROUNDS } = require('~/consts/auth')
 
 const bcrypt = require('bcrypt')
 
-// Безпечний імпорт SALT_ROUNDS: беремо з констант або використовуємо 10 за замовчуванням
-const authConsts = require('~/consts/auth')
-const SALT_ROUNDS = authConsts.SALT_ROUNDS || 10
+// Визначаємо SALT_ROUNDS: пріоритет константі з файлу, інакше 10
+const SALT_ROUNDS = AUTH_SALT_ROUNDS || 10
 
 const authService = {
   signup: async (role, firstName, lastName, email, password, language) => {
@@ -91,13 +89,10 @@ const authService = {
       throw createError(401, USER_NOT_FOUND)
     }
 
-    // compare through bcrypt if not from Google
-    //const checkedPassword = isFromGoogle || await bcrypt.compare(password, user.password)
-
     let checkedPassword = isFromGoogle
 
     if (!isFromGoogle) {
-      // check if the password in DB is hashed (bcrypt format)
+      // Перевіряємо, чи пароль у БД вже захешований (формат bcrypt)
       const bcryptHashRegex = /^\$2[aby]\$\d{1,2}\$[./A-Za-z0-9]{53}$/
       const isHashed = bcryptHashRegex.test(user.password)
 
@@ -187,7 +182,7 @@ const authService = {
     }
 
     const { id: userId, firstName, email } = tokenData
-    // hash the new password before saving
+    // Хешуємо новий пароль перед збереженням
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
     await privateUpdateUser(userId, { password: hashedPassword })
 
