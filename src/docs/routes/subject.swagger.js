@@ -170,4 +170,42 @@
  *                   message: "name should be between 1 and 30 characters"
  *       500:
  *         description: Internal server error
+ *
+ *   delete:
+ *     summary: Delete a subject by ID
+ *     description: Deletes a subject by its ID. Available only for admin and super admin users.
+ *     tags: [Subjects]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: MongoDB ObjectId of the subject
+ *     responses:
+ *       204:
+ *         description: Subject deleted successfully
+ *       401:
+ *         description: Unauthorized - user is not authenticated
+ *       403:
+ *         description: Forbidden - user does not have permission
+ *       404:
+ *         description: Subject with the specified ID was not found
+ *       422:
+ *         description: Validation error - invalid ID format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 422
+ *                 message:
+ *                   type: string
+ *                   example: id should be of proper type ObjectId
+ *       500:
+ *         description: Internal server error
  */

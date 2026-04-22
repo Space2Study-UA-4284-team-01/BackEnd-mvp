@@ -13,5 +13,6 @@ router.use(restrictTo(ADMIN, SUPERADMIN))
 
 router.post('/', asyncWrapper(subjectController.createSubject))
 router.patch('/:id', asyncWrapper(subjectController.updateSubject))
+router.delete('/:id', asyncWrapper(subjectController.deleteSubject))
 
 module.exports = router

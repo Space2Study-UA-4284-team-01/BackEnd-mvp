@@ -1,5 +1,6 @@
 const Subject = require('~/models/subject')
 const Category = require('~/models/category')
+const User = require('~/models/user')
 const errors = require('~/consts/errors')
 const { createError } = require('~/utils/errorsHelper')
 const { validateFunc } = require('~/utils/validationHelper')
@@ -127,6 +128,29 @@ const subjectService = {
       return await subject.save()
     } catch (err) {
       handleServiceError(err, 'Failed to update subject')
+    }
+  },
+  
+  deleteSubject: async (id) => {
+    try {
+      validateObjectId(id, 'id')
+      const subject = await Subject.findById(id)
+
+      if (!subject) {
+        throw createError(404, errors.SUBJECT_NOT_FOUND)
+      }
+
+      // Remove the subject from all users' mainSubjects arrays
+      await User.updateMany(
+        { $or: [{ 'mainSubjects.student': id }, { 'mainSubjects.tutor': id }] },
+        { $pull: { 'mainSubjects.student': id, 'mainSubjects.tutor': id } }
+      )
+
+      await Subject.findByIdAndDelete(id)
+
+      return
+    } catch (err) {
+      handleServiceError(err, 'Failed to delete subject')
     }
   }
 }
