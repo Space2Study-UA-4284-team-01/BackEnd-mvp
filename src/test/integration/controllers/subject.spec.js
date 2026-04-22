@@ -8,7 +8,8 @@ const {
   FIELD_IS_NOT_OF_PROPER_LENGTH,
   SUBJECT_ALREADY_EXISTS,
   FIELD_IS_NOT_OF_PROPER_TYPE,
-  SUBJECT_NOT_FOUND
+  SUBJECT_NOT_FOUND,
+  BODY_IS_NOT_DEFINED
 } = require('~/consts/errors')
 const setupControllerTests = require('~/test/helpers/controllerSetup')
 const Category = require('~/models/category')
@@ -222,6 +223,84 @@ describe('Subject controller', () => {
     })
   })
 
+  describe('PATCH /subjects/:id', () => {
+    let subjectToUpdateId
+
+    beforeEach(async () => {
+      // Create a subject to update
+      const response = await app
+        .post(endpointUrl)
+        .send(testSubjectData)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      subjectToUpdateId = response.body.data._id
+    })
+
+    it('should update subject successfully for admin user', async () => {
+      const updatedData = { name: 'Updated Name' }
+      const response = await app
+        .patch(`${endpointUrl}${subjectToUpdateId}`)
+        .send(updatedData)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      expect(response.statusCode).toBe(200)
+      expect(response.body.data).toMatchObject({
+        _id: subjectToUpdateId,
+        name: updatedData.name,
+        category: testSubjectData.category
+      })
+    })
+
+    it('should return 404 when trying to update non-existing subject', async () => {
+      const nonExistingId = new mongoose.Types.ObjectId().toString()
+      const response = await app
+        .patch(`${endpointUrl}${nonExistingId}`)
+        .send({ name: 'New Name' })
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      expectError(404, SUBJECT_NOT_FOUND, response)
+    })
+
+    it('should return 409 when updating to existing name', async () => {
+      await app
+        .post(endpointUrl)
+        .send({ name: 'Physics', category: validCategoryId })
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      const response = await app
+        .patch(`${endpointUrl}${subjectToUpdateId}`)
+        .send({ name: 'Physics' })
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+
+      expectError(409, SUBJECT_ALREADY_EXISTS, response)
+    })
+
+    it('should return 403 for student user', async () => {
+      const response = await app
+        .patch(`${endpointUrl}${subjectToUpdateId}`)
+        .send({ name: 'New Name' })
+        .set('Cookie', [`accessToken=${token.studentAccessToken}`])
+      expectError(403, FORBIDDEN, response)
+    })
+
+    it('should return 403 for tutor user', async () => {
+      const response = await app
+        .patch(`${endpointUrl}${subjectToUpdateId}`)
+        .send({ name: 'New Name' })
+        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
+      expectError(403, FORBIDDEN, response)
+    })
+
+    it('should return 401 for unauthenticated user', async () => {
+      const response = await app.patch(`${endpointUrl}${subjectToUpdateId}`).send({ name: 'New Name' })
+      expectError(401, UNAUTHORIZED, response)
+    })
+
+    it('should return 422 for missing body', async () => {
+      const response = await app
+        .patch(`${endpointUrl}${subjectToUpdateId}`)
+        .set('Cookie', [`accessToken=${token.adminAccessToken}`])
+      expectError(422, BODY_IS_NOT_DEFINED, response)
+    })
+  })
+  
   describe('DELETE /subjects/:id', () => {
     let subjectToDeleteId
 
