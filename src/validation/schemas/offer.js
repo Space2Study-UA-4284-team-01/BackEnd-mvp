@@ -31,4 +31,26 @@ const offerSchema = Joi.object({
     .required()
 })
 
-module.exports = offerSchema
+const updateOfferSchema = Joi.object({
+  price: Joi.number().min(1),
+  proficiencyLevel: Joi.string().valid(...enums.PROFICIENCY_LEVEL_ENUM),
+  title: Joi.string().trim().min(lengths.MIN_NAME_LENGTH).max(100),
+  description: Joi.string().trim().min(1).max(1000),
+  languages: Joi.array()
+    .items(Joi.string().valid(...enums.SPOKEN_LANG_ENUM))
+    .min(1),
+  subject: Joi.string(),
+  category: Joi.string(),
+  status: Joi.string().valid(...enums.OFFER_STATUS_ENUM),
+  faq: Joi.array().items(
+    Joi.object({
+      question: Joi.string().trim().required(),
+      answer: Joi.string().trim().required()
+    })
+  )
+})
+
+module.exports = {
+  offerSchema,
+  updateOfferSchema
+}

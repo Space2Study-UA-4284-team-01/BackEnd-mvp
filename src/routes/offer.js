@@ -7,7 +7,7 @@ const isEntityValid = require('~/middlewares/entityValidation')
 const validationMiddleware = require('~/middlewares/validation')
 
 const offerController = require('~/controllers/offer')
-const { offerSchema } = require('~/validation/services/offer')
+const { offerSchema, updateOfferSchema } = require('~/validation/schemas/offer')
 const Offer = require('~/models/offer')
 
 const body = [
@@ -27,7 +27,7 @@ router.get('/:id', isEntityValid({ params }), asyncWrapper(offerController.getOf
 
 router.patch(
   '/:id',
-  validationMiddleware(offerSchema),
+  validationMiddleware(updateOfferSchema),
   isEntityValid({ params }),
   asyncWrapper(offerController.updateOffer)
 )
