@@ -7,7 +7,7 @@ const { TUTOR, ADMIN } = require('~/consts/auth').roles
 
 router.use(authMiddleware)
 
-router.get('/', asyncWrapper(lessonController.getLessons))
+//router.get('/', asyncWrapper(lessonController.getLessons))
 
 router.use(restrictTo(TUTOR,ADMIN))
 router.post('/', asyncWrapper(lessonController.createLesson))
