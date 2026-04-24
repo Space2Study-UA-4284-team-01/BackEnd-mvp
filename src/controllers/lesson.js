@@ -14,7 +14,14 @@ const getLessons = async (req, res) => {
     res.status(200).json(lessons)
 }
 
+const getLessonById = async (req, res) => {
+  const { id } = req.params
+  const lesson = await lessonService.getLessonById(id)
+  res.status(200).json(lesson)
+}
+
 module.exports = {
   createLesson,
-  getLessons
+  getLessons,
+  getLessonById
 }

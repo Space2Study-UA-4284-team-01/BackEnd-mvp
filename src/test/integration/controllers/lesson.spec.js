@@ -2,6 +2,7 @@ const { expectError } = require('~/test/helpers')
 const { UNAUTHORIZED, FORBIDDEN, FIELD_IS_NOT_DEFINED } = require('~/consts/errors')
 const setupControllerTests = require('~/test/helpers/controllerSetup')
 const Category = require('~/models/category')
+const mongoose = require('mongoose')
 
 const endpointUrl = '/lessons/'
 
@@ -117,4 +118,42 @@ describe('Lesson controller', () => {
         expect(response.body).toEqual([])
     })
   })
+
+  describe('GET /lessons/:id', () => {
+    it('should return lesson by valid id', async () => {
+        const createResponse = await app
+        .post(endpointUrl)
+        .send(createLessonData())
+        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
+
+        const lessonId = createResponse.body._id || createResponse.body.id
+
+        const response = await app
+        .get(`${endpointUrl}${lessonId}`)
+        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
+
+        expect(response.statusCode).toBe(200)
+        expect(response.body.title).toBe(createLessonData().title)
+    })
+
+    it('should return 404 for non-existent id', async () => {
+        const fakeId = new mongoose.Types.ObjectId()
+
+        const response = await app
+        .get(`${endpointUrl}${fakeId}`)
+        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
+
+        expect(response.statusCode).toBe(404)
+    })
+
+    it('should return 422 for invalid id format', async () => {
+        const invalidId = 'invalid-id'
+
+        const response = await app
+        .get(`${endpointUrl}${invalidId}`)
+        .set('Cookie', [`accessToken=${token.tutorAccessToken}`])
+
+        expect(response.statusCode).toBe(422)
+    })
+   })
 })
