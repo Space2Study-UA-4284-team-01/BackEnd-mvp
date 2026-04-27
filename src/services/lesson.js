@@ -64,7 +64,23 @@ const lessonService = {
         : null,
         updatedAt: lesson.updatedAt
     }))
-  }
+  },
+
+  getLessonById: async (id) => {
+    validateObjectId(id, 'lesson')
+    
+    const lesson = await Lesson.findById(id)
+      .populate('author', '_id firstName lastName')
+      //.populate('attachments')
+      .populate('category', 'name')
+      .lean()
+      
+    if (!lesson) {
+        throw createError(404, 'LESSON_NOT_FOUND') 
+    }
+    
+    return lesson
+    }
 
 }
 

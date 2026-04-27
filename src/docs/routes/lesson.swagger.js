@@ -52,3 +52,34 @@
  *       401:
  *         description: Unauthorized
  */
+
+/**
+ * @swagger
+ * /lessons/{id}:
+ *   get:
+ *     summary: Get lesson by id
+ *     tags: [Lessons]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Lesson ID
+ *         schema:
+ *           type: string
+ *           example: 64f1c2a5b9c123456789abcd
+ *     responses:
+ *       200:
+ *         description: Lesson retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LessonDetailed'
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Lesson not found
+ *       422:
+ *         description: Invalid lesson id format
+ */

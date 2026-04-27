@@ -9,6 +9,7 @@ router.use(authMiddleware)
 
 router.use(restrictTo(TUTOR, ADMIN))
 router.get('/', asyncWrapper(lessonController.getLessons))
+router.get('/:id', asyncWrapper(lessonController.getLessonById))
 router.post('/', asyncWrapper(lessonController.createLesson))
 
 module.exports = router
