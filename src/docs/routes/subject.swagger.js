@@ -1,85 +1,9 @@
 /**
  * @swagger
- * /subjects/{id}:
- *   get:
- *     summary: Get subject by ID
- *     description: Retrieves a subject by its ID. Available for all authenticated users.
- *     tags: [Subjects]
- *     security:
- *       - cookieAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           pattern: "^[0-9a-fA-F]{24}$"
- *         description: MongoDB ObjectId of the subject
- *         example: "60d5ecb74b24c72b8c8b4567"
- *     responses:
- *       200:
- *         description: Subject retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       example: "60d5ecb74b24c72b8c8b4567"
- *                     name:
- *                       type: string
- *                       example: "Algebra"
- *                     category:
- *                       type: object
- *                       properties:
- *                         _id:
- *                           type: string
- *                           description: Category ID
- *                           example: "60d5ecb74b24c72b8c8b4568"
- *                         name:
- *                           type: string
- *                           description: Category name
- *                           example: "Mathematics"
- *                     totalOffers:
- *                       type: object
- *                       properties:
- *                         student:
- *                           type: integer
- *                           example: 0
- *                         tutor:
- *                           type: integer
- *                           example: 0
- *       401:
- *         description: Unauthorized - user is not authenticated
- *       404:
- *         description: Subject with the specified ID was not found
- *       422:
- *         description: Validation error - invalid ID format
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 422
- *                 code:
- *                   type: string
- *                   example: FIELD_IS_NOT_OF_PROPER_TYPE
- *                 message:
- *                   type: string
- *                   example: "id should be of type ObjectId"
- *       500:
- *         description: Internal server error
- *
  * /subjects:
  *   get:
  *     summary: Get a list of subjects
- *     description: Retrieve a list of subjects with optional filtering by category or name. Available for all authenticated users.
+ *     description: Retrieve a list of subjects with optional filtering by category or name.
  *     tags: [Subjects]
  *     security:
  *       - cookieAuth: []
@@ -89,14 +13,10 @@
  *         schema:
  *           type: string
  *           pattern: "^[0-9a-fA-F]{24}$"
- *         description: Filter subjects by category ObjectId
- *         example: "60d5ecb74b24c72b8c8b4568"
  *       - in: query
  *         name: name
  *         schema:
  *           type: string
- *         description: Search subjects by name (case-insensitive partial match)
- *         example: "alg"
  *     responses:
  *       200:
  *         description: List of subjects retrieved successfully
@@ -110,11 +30,9 @@
  *                   items:
  *                     $ref: '#/components/schemas/Subject'
  *       401:
- *         description: Unauthorized - user is not authenticated
- *       403:
- *         description: Forbidden - user does not have permission
+ *         description: Unauthorized
  *       422:
- *         description: Validation error - invalid query parameters
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
@@ -122,19 +40,16 @@
  *               properties:
  *                 status:
  *                   type: integer
- *                   example: 422
  *                 code:
  *                   type: string
- *                   example: FIELD_IS_NOT_OF_PROPER_TYPE
  *                 message:
  *                   type: string
- *                   example: "category should be of type ObjectId"
  *       500:
  *         description: Internal server error
  *
  *   post:
  *     summary: Create a new subject
- *     description: Creates a new subject. Available only for admin and super admin users.
+ *     description: Admin and SuperAdmin only
  *     tags: [Subjects]
  *     security:
  *       - cookieAuth: []
@@ -144,66 +59,43 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - category
+ *             required: [name, category]
  *             properties:
  *               name:
  *                 type: string
  *                 minLength: 1
  *                 maxLength: 30
- *                 description: Subject name (must be unique)
- *                 example: "Algebra"
  *               category:
  *                 type: string
- *                 description: MongoDB ObjectId of the category the subject belongs to
- *                 example: "60d5ecb74b24c72b8c8b4568"
+ *                 pattern: "^[0-9a-fA-F]{24}$"
  *     responses:
  *       201:
  *         description: Subject created successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       409:
+ *         description: Subject already exists
+ *       422:
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 data:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       example: "60d5ecb74b24c72b8c8b4567"
- *                     name:
- *                       type: string
- *                       example: "Algebra"
- *                     category:
- *                       type: string
- *                       example: "60d5ecb74b24c72b8c8b4568"
- *                     totalOffers:
- *                       type: object
- *                       properties:
- *                         student:
- *                           type: integer
- *                           example: 0
- *                         tutor:
- *                           type: integer
- *                           example: 0
- *       401:
- *         description: Unauthorized - user is not authenticated
- *       403:
- *         description: Forbidden - user does not have admin or superadmin role
- *       409:
- *         description: Subject with the specified name already exists
- *       422:
- *         description: Validation error - missing or invalid fields
+ *                 status:
+ *                   type: integer
+ *                 code:
+ *                   type: string
+ *                 message:
+ *                   type: string
  *       500:
  *         description: Internal server error
  *
- * /categories/{id}/subjects/names:
+ * /subjects/{id}:
  *   get:
- *     summary: Get subject names by category ID
- *     description: >
- *       Returns an array of subject objects that belong to the specified category.
- *       Available for all authenticated users.
+ *     summary: Get subject by ID
  *     tags: [Subjects]
  *     security:
  *       - cookieAuth: []
@@ -214,55 +106,136 @@
  *         schema:
  *           type: string
  *           pattern: "^[0-9a-fA-F]{24}$"
- *         description: MongoDB ObjectId of the category
- *         example: "60d5ecb74b24c72b8c8b4568"
  *     responses:
  *       200:
- *         description: Subject list retrieved successfully
+ *         description: Subject retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Subject not found
+ *       422:
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 data:
- *                   type: array
- *                   description: List of subjects belonging to the category
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                         pattern: "^[0-9a-fA-F]{24}$"
- *                         example: "60d5ecb74b24c72b8c8b4568"
- *                       name:
- *                         type: string
- *                         example: "Algebra"
- *                     required:
- *                       - _id
- *                       - name
- *             example:
- *               data:
- *                 - _id: "60d5ecb74b24c72b8c8b4568"
- *                   name: "Algebra"
- *                 - _id: "60d5ecb74b24c72b8c8b4569"
- *                   name: "Calculus"
- *       401:
- *         description: Unauthorized - user is not authenticated
- *       404:
- *         description: Category not found
- *       422:
- *         description: Validation error - invalid ObjectId
+ *                 status:
+ *                   type: integer
+ *                 code:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
  *
- * /categories/subjects/names:
- *   get:
- *     summary: Get all subject names
- *     description: Returns all subjects across all categories. Available for all authenticated users.
+ *   patch:
+ *     summary: Update subject
  *     tags: [Subjects]
  *     security:
  *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             minProperties: 1
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 30
+ *               category:
+ *                 type: string
+ *                 pattern: "^[0-9a-fA-F]{24}$"
  *     responses:
  *       200:
- *         description: Subject list retrieved successfully
+ *         description: Subject updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Subject not found
+ *       409:
+ *         description: Subject already exists
+ *       422:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                 code:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ *
+ *   delete:
+ *     summary: Delete subject
+ *     tags: [Subjects]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *     responses:
+ *       204:
+ *         description: Subject deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Subject not found
+ *       422:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                 code:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ *
+ * /categories/{id}/subjects/names:
+ *   get:
+ *     summary: Get subject names by category ID
+ *     tags: [Subjects]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *     responses:
+ *       200:
+ *         description: Subject names retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -270,26 +243,31 @@
  *               properties:
  *                 data:
  *                   type: array
- *                   description: List of all subjects
  *                   items:
  *                     type: object
  *                     properties:
  *                       _id:
  *                         type: string
  *                         pattern: "^[0-9a-fA-F]{24}$"
- *                         example: "60d5ecb74b24c72b8c8b4568"
  *                       name:
  *                         type: string
- *                         example: "Algebra"
- *                     required:
- *                       - _id
- *                       - name
- *             example:
- *               data:
- *                 - _id: "60d5ecb74b24c72b8c8b4568"
- *                   name: "Algebra"
- *                 - _id: "60d5ecb74b24c72b8c8b4569"
- *                   name: "Quantum Physics"
  *       401:
- *         description: Unauthorized - user is not authenticated
+ *         description: Unauthorized
+ *       404:
+ *         description: Category not found
+ *       422:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                 code:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
  */

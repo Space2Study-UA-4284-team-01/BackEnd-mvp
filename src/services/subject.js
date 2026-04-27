@@ -1,5 +1,6 @@
 const Subject = require('~/models/subject')
 const Category = require('~/models/category')
+const User = require('~/models/user')
 const errors = require('~/consts/errors')
 const { createError } = require('~/utils/errorsHelper')
 const { validateFunc } = require('~/utils/validationHelper')
@@ -101,6 +102,76 @@ const subjectService = {
       return await Subject.create({ ...data, name: normalizedName })
     } catch (err) {
       handleServiceError(err, 'Failed to create subject')
+    }
+  },
+
+  updateSubject: async (id, data) => {
+    try {
+      validateObjectId(id, 'id')
+
+      const subject = await Subject.findById(id)
+      if (!subject) {
+        throw createError(404, errors.SUBJECT_NOT_FOUND)
+      }
+
+      const updateData = {}
+
+      // Name update and validation
+      if (data.name !== undefined) {
+        validateFunc.type('name', 'string', data.name)
+
+        const sanitizedName = mongosanitize(data.name)
+        const normalizedName = String(sanitizedName).trim()
+        validateFunc.length('name', { min: 1, max: 30 }, normalizedName)
+
+        // Check for duplicate name only if the name is being updated
+        const existingSubject = await Subject.findOne({ name: normalizedName, _id: { $ne: id } })
+        if (existingSubject) {
+          throw createError(409, errors.SUBJECT_ALREADY_EXISTS)
+        }
+        updateData.name = normalizedName
+      }
+
+      // Category update and validation
+      if (data.category !== undefined) {
+        validateObjectId(data.category, 'category')
+
+        const categoryExists = await Category.findById(data.category)
+
+        if (!categoryExists) {
+          throw createError(404, errors.CATEGORY_NOT_FOUND)
+        }
+        updateData.category = data.category
+      }
+
+      // Update the subject
+      Object.assign(subject, updateData)
+      return await subject.save()
+    } catch (err) {
+      handleServiceError(err, 'Failed to update subject')
+    }
+  },
+  
+  deleteSubject: async (id) => {
+    try {
+      validateObjectId(id, 'id')
+      const subject = await Subject.findById(id)
+
+      if (!subject) {
+        throw createError(404, errors.SUBJECT_NOT_FOUND)
+      }
+
+      // Remove the subject from all users' mainSubjects arrays
+      await User.updateMany(
+        { $or: [{ 'mainSubjects.student': id }, { 'mainSubjects.tutor': id }] },
+        { $pull: { 'mainSubjects.student': id, 'mainSubjects.tutor': id } }
+      )
+
+      await Subject.findByIdAndDelete(id)
+
+      return
+    } catch (err) {
+      handleServiceError(err, 'Failed to delete subject')
     }
   }
 }
