@@ -52,6 +52,27 @@ const subjectService = {
     }
   },
 
+  getSubjectNamesByCategoryId: async (categoryId) => {
+    const filter = {}
+
+    if (categoryId) {
+      validateObjectId(categoryId, 'id')
+
+      const categoryExists = await Category.findById(categoryId).lean().exec()
+      if (!categoryExists) {
+        throw createError(404, errors.CATEGORY_NOT_FOUND)
+      }
+
+      filter.category = categoryId
+    }
+
+    const subjects = await Subject.find(filter).select('name').lean().exec()
+    return subjects.map(({ _id, name }) => ({
+      _id,
+      name
+    }))
+  },
+
   createSubject: async (data) => {
     try {
       const { name, category } = data
